@@ -49,13 +49,13 @@ func BotProtectionHandler(w http.ResponseWriter, r *http.Request) {
 	encodedURL := url.QueryEscape(originURL)
 	finalURL := fmt.Sprintf("/__verify?to=%s", encodedURL)
 
-	html, err := os.ReadFile("assets/html/bot_protection.html")
+	html, err := os.ReadFile("assets/bot_protection/index.html")
 	if err != nil {
 		http.Error(w, "Internal error reading html file", http.StatusInternalServerError)
 		return
 	}
 
-	js, err := os.ReadFile("assets/js/bot_protection.js")
+	js, err := os.ReadFile("assets/bot_protection/index.js")
 	if err != nil {
 		http.Error(w, "Internal error reading js file", http.StatusInternalServerError)
 		return
@@ -63,8 +63,6 @@ func BotProtectionHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsWithToken := strings.ReplaceAll(string(js), "{-URL-}", finalURL)
 	ofuscatedJs := ObfuscateJS(jsWithToken)
-
-	os.WriteFile("obfuscated.js", []byte(ofuscatedJs), 0644)
 
 	htmlStr := strings.ReplaceAll(string(html), "//JS//", string(ofuscatedJs))
 	w.Write([]byte(htmlStr))

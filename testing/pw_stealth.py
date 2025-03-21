@@ -4,8 +4,8 @@ from playwright_stealth import stealth_sync
 
 with sync_playwright() as p:
     # browser_type = p.firefox
-    browser_type = p.webkit
-    # browser_type = p.chromium
+    # browser_type = p.webkit
+    browser_type = p.chromium
 
     browser = browser_type.launch(
         headless=False, args=["--no-sandbox", "--disable-dev-shm-usage"]

@@ -4,7 +4,7 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/fxoz/bot-mitigation-go)
 ![GitHub License](https://img.shields.io/github/license/fxoz/bot-mitigation-go)
 
-One of my first projects in Go: A reverse proxy server that detects bots and automated browsers. Inspired by *Cloudflare*, [*Anubis*](https://github.com/TecharoHQ/anubis) and - to some extend - by the [*GrimAC* anti-cheat plugin](https://github.com/GrimAnticheat/Grim).
+One of my first projects in Go: A reverse proxy server that detects bots and automated browsers. Inspired by *Cloudflare*, [*Anubis*](https://github.com/TecharoHQ/anubis) and - to some extent - by the [*GrimAC* anti-cheat plugin](https://github.com/GrimAnticheat/Grim).
 
 With LLM scrapers gaining popularity, bot mitigation is more important than ever. This experimental project aims to provide a high-performance, scalable and easy-to-use solution for bot detection and mitigation.
 
@@ -67,7 +67,7 @@ Unless otherwise noted, **headful** mode is used, since headless mode can be det
 | TFP: Webkit  | ✅         | Fails [`navigator.webdriver`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/webdriver) |
 | UCD          | ❌         | As of 2025-03-21                                                                                    |
 
-⚠️ **Note:** The auomated browsers with evasion techniques fail the very simple check `navigator.webdriver` unexpectedly. More testing is needed to ensure that I set up the testing environment correctly.
+⚠️ **Note:** The auomated browsers with evasion techniques fail the very simple check `navigator.webdriver` unexpectedly. More testing is needed to ensure that I set up the testing environment correctly. Otherwise, this could mean that PWS and TFP only focus on specific platforms or that the evasion techniques are not working as intended.
 
 ## Browser Compatibility
 
