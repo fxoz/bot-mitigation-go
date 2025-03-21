@@ -1,6 +1,7 @@
 package antibot
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -48,6 +49,17 @@ func InitDB() *gorm.DB {
 			Colorful:      false,
 		},
 	)
+
+	folderPath := "db"
+
+	if _, err := os.Stat(folderPath); os.IsNotExist(err) {
+		err := os.Mkdir(folderPath, 0755)
+		if err != nil {
+			fmt.Println("Error creating folder:", err)
+		} else {
+			fmt.Println("Folder created successfully.")
+		}
+	}
 
 	db, err := gorm.Open(sqlite.Open("db/whitelisted_clients.db"), &gorm.Config{
 		Logger: newLogger,
