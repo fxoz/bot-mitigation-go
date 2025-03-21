@@ -1,72 +1,51 @@
 package antibot
 
 import (
-	"bytes"
 	"encoding/base64"
 	"fmt"
-	"math/rand"
-	"regexp"
+	"strings"
 )
 
-// randomString produces a random alphabetic string of the given length.
-// These random strings will be used as variable names to hide meaning.
-func randomString(n int) string {
-	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
+func ObfuscateJS(jsCode string) string {
+	encoded := base64.StdEncoding.EncodeToString([]byte(jsCode))
+
+	chunkSize := 10
+	var chunks []string
+	for i := 0; i < len(encoded); i += chunkSize {
+		end := i + chunkSize
+		if end > len(encoded) {
+			end = len(encoded)
+		}
+		chunk := encoded[i:end]
+		chunks = append(chunks, reverseString(chunk))
 	}
-	return string(b)
+
+	var sb strings.Builder
+	sb.WriteString("(function(){\n")
+	sb.WriteString("  if(false){var _0xdummy = function(){return 'dummy';};}\n")
+	sb.WriteString("  var _0xarr = [")
+	for i, chunk := range chunks {
+		sb.WriteString(fmt.Sprintf("\"%s\"", chunk))
+		if i != len(chunks)-1 {
+			sb.WriteString(",")
+		}
+	}
+	sb.WriteString("];\n")
+	sb.WriteString("  var _0xstr = \"\";\n")
+	sb.WriteString("  for(var i = _0xarr.length - 1; i >= 0; i--){\n")
+	sb.WriteString("      _0xstr += _0xarr[i];\n")
+	sb.WriteString("  }\n")
+	sb.WriteString("  _0xstr = _0xstr.split(\"\").reverse().join(\"\");\n")
+	sb.WriteString("  eval(atob(_0xstr));\n")
+	sb.WriteString("})();")
+
+	return sb.String()
 }
 
-// ObfuscateJS takes a JavaScript code string and returns an obfuscated version,
-// wrapped in a <script> tag. The obfuscated code is heavily hidden using a two‑step process:
-//   - The JS code is minified by removing extra whitespace
-//   - It is then XOR‑encrypted with a random key and Base64‑encoded.
-//
-// At runtime, the generated script decodes and decrypts the code before passing it to eval.
-func ObfuscateJS(jsCode string) string {
-	// Step 1: Remove extra whitespace (a simple minification step).
-	re := regexp.MustCompile(`\s+`)
-	compactJS := re.ReplaceAllString(jsCode, " ")
-
-	// Step 2: Generate a random key for XOR encryption.
-	xorKey := randomString(10)
-
-	// Step 3: Perform XOR encryption with the random key.
-	var encrypted bytes.Buffer
-	codeBytes := []byte(compactJS)
-	for i, b := range codeBytes {
-		encrypted.WriteByte(b ^ xorKey[i%len(xorKey)])
+func reverseString(s string) string {
+	runes := []rune(s)
+	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+		runes[i], runes[j] = runes[j], runes[i]
 	}
-	// Base64 encode the encrypted data.
-	encodedData := base64.StdEncoding.EncodeToString(encrypted.Bytes())
-
-	// Step 4: Create randomized variable and function names for the output snippet.
-	keyVar := randomString(8)         // Holds the XOR key.
-	dataVar := randomString(8)        // Holds the Base64 encoded encrypted data.
-	decryptFuncVar := randomString(8) // The decryption function.
-
-	// Step 5: Build the self-decoding JavaScript snippet.
-	// Note: The double '%%' escapes a percent sign so that "% k.length" shows correctly in the output.
-	obfuscatedJS := fmt.Sprintf(
-		`<script>(function(){
-    var %s = "%s";
-    var %s = "%s";
-    function %s(d, k){
-        var r = "";
-        var s = atob(d);
-        for(var i = 0; i < s.length; i++){
-            r += String.fromCharCode(s.charCodeAt(i) ^ k.charCodeAt(i %% k.length));
-        }
-        return r;
-    }
-    eval(%s(%s, %s));
-})();</script>`,
-		keyVar, xorKey,
-		dataVar, encodedData,
-		decryptFuncVar,
-		decryptFuncVar, dataVar, keyVar)
-
-	return obfuscatedJS
+	return string(runes)
 }

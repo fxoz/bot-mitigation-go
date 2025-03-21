@@ -26,6 +26,13 @@ function main() {
     }
     statusText.innerText = 'Passed window globals';
 
+    if (navigator.userAgent.includes("Headless")) {
+        statusText.innerText = 'Failed user agent (headless)';
+        return botDetected();
+    }
+    statusText.innerText = 'Passed user agent (headless)';
+
+    //! Experimental
     try {
         navigator.userAgent
     } catch {
@@ -40,17 +47,15 @@ function main() {
     }
     statusText.innerText = 'Passed chrome spoofing';
 
-    if (navigator.userAgent.includes("Headless")) {
-        statusText.innerText = 'Failed user agent (headless)';
-        return botDetected();
-    }
-    statusText.innerText = 'Passed user agent (headless)';
-
     if (checkVideoCodecSupport('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') === "") {
         statusText.innerText = 'Failed codec';
         return botDetected();
     }
 
+    if (window.devicePixelRatio === 1.0000000149011612) {
+        statusText.innerText = 'Failed device pixel ratio';
+        return botDetected();
+    }
     statusText.innerText = 'Passed';
 }
 

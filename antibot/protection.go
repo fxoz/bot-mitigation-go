@@ -63,6 +63,9 @@ func BotProtectionHandler(w http.ResponseWriter, r *http.Request) {
 
 	jsWithToken := strings.ReplaceAll(string(js), "{-URL-}", finalURL)
 	ofuscatedJs := ObfuscateJS(jsWithToken)
+
+	os.WriteFile("obfuscated.js", []byte(ofuscatedJs), 0644)
+
 	htmlStr := strings.ReplaceAll(string(html), "//JS//", string(ofuscatedJs))
 	w.Write([]byte(htmlStr))
 }

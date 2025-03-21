@@ -19,7 +19,9 @@ With LLM scrapers gaining popularity, bot mitigation is more important than ever
 
 ### Planned
 
-- Webkit support, additional Microsoft Edge testing
+- Webkit testing
+- Microsoft Edge testing
+- iOS/MacOS testing
 - Monitor input fields & scrolling
 - Various checks for `playwright_stealth` and `undetected-chromedriver`
 - VPN/Proxy/datacenter/TOR detection
@@ -41,14 +43,17 @@ The goal is to detect all of the following methods, especially automated browser
 - **PW** - [Playwright](https://playwright.dev/python/) (regular)
 - **UCD** - [ultrafunkamsterdam/undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver)
 - **PWS** - [AtuboDad/playwright_stealth](https://github.com/AtuboDad/playwright_stealth)
-- **TFP** - [tinyfish-io/tf-playwright-stealth](https://github.com/tinyfish-io/tf-playwright-stealth)
+- **TFP** - [tinyfish-io/tf-playwright-stealth](https://github.com/tinyfish-io/tf-playwright-stealth) (fork of `playwright_stealth`)
+
+*Detected:* If the bot protection flags a client as a bot.
+Unless otherwise noted, **headful** mode is used, since headless mode can be detected easier.
 
 ### Regular browsers
 
-| Client                     | Detected? | Note                            |
-| -------------------------- | --------- | ------------------------------- |
-| Simple `curl` request etc. | ✅         | Protection needs JS to function |
-| PW: Chrome                 | ✅         | As of 2025-03-21                |
+| Client                     | Detected? | Note             |
+| -------------------------- | --------- | ---------------- |
+| Simple `curl` request etc. | ✅         | JS is required   |
+| PW: Chrome                 | ✅         | As of 2025-03-21 |
 
 ### Browsers with evasion techniques
 
@@ -57,7 +62,12 @@ The goal is to detect all of the following methods, especially automated browser
 | PWS: Chrome  | ✅         | Fails [`navigator.webdriver`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/webdriver) |
 | PWS: Firefox | ✅         | Fails [`navigator.userAgent`](https://caniuse.com/?search=navigator.userAgent)                      |
 | PWS: WebKit  | ✅         | Fails [`navigator.userAgent`](https://caniuse.com/?search=navigator.userAgent)                      |
+| TFP: Chrome  | ✅         | Fails [`window.devicePixelRatio`](https://caniuse.com/?search=window.devicePixelRatio)              |
+| TFP: Firefox | ✅         | Fails [`navigator.webdriver`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/webdriver) |
+| TFP: Webkit  | ✅         | Fails [`navigator.webdriver`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/webdriver) |
 | UCD          | ❌         | As of 2025-03-21                                                                                    |
+
+⚠️ **Note:** The auomated browsers with evasion techniques fail the very simple check `navigator.webdriver` unexpectedly. More testing is needed to ensure that I set up the testing environment correctly.
 
 ## Browser Compatibility
 
