@@ -20,11 +20,11 @@ function main() {
     }
     statusText.innerText = 'Passed navigator.webdriver';
 
-    if (!!(window.__driver_unwrapped || window.__webdriver_script_fn)) {
-        statusText.innerText = 'Failed window attributes';
+    if (!!(window.__driver_unwrapped || window.__webdriver_script_fn || window.__driver_evaluate)) {
+        statusText.innerText = 'Failed window globals';
         return botDetected();
     }
-    statusText.innerText = 'Passed window attributes';
+    statusText.innerText = 'Passed window globals';
 
     try {
         navigator.userAgent

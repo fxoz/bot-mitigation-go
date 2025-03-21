@@ -14,6 +14,8 @@ With LLM scrapers gaining popularity, bot mitigation is more important than ever
 - Configurable using yml.
 - Designed to prevent even automated browsers with additional bot detection protections like `playwright_stealth` and `undetected-chromedriver`
 - Written in Go to ensure high performance and scalability
+- Tested on various browsers and platforms, see below
+  - Niche browsers like *Mullvad* are tested as well, since privacy-focused browsers sometimes break websites
 
 ### Planned
 
@@ -36,9 +38,10 @@ With LLM scrapers gaining popularity, bot mitigation is more important than ever
 
 The goal is to detect all of the following methods, especially automated browsers with additional bot detection protection.
 
-- **PW** - [Playwright](https://playwright.dev/python/)
+- **PW** - [Playwright](https://playwright.dev/python/) (regular)
 - **UCD** - [ultrafunkamsterdam/undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver)
 - **PWS** - [AtuboDad/playwright_stealth](https://github.com/AtuboDad/playwright_stealth)
+- **TFP** - [tinyfish-io/tf-playwright-stealth](https://github.com/tinyfish-io/tf-playwright-stealth)
 
 ### Regular browsers
 
@@ -60,16 +63,75 @@ The goal is to detect all of the following methods, especially automated browser
 
 It's really important to ensure that the bot protection doesn't break the website for legitimate users, even on older browsers. Please note that it's incredibly intricate to get the balance between security and compatibility right and that testing several browsers and their older versions takes a lot of time.
 
-| Browser                            | Passing? | Note             |
-| ---------------------------------- | -------- | ---------------- |
-| Windows: Brave 1.76.80 (C 134)     | ✅        | As of 2025-03-21 |
-| Windows: Chrome 134                | ✅        | As of 2025-03-21 |
-| Windows: ungoogled-chromium 123    | ✅        | As of 2025-03-21 |
-| Windows: Firefox 136               | ✅        | As of 2025-03-21 |
-| Android 14: Chrome 126             | ✅        | As of 2025-03-21 |
-| Android 14: Brave 1.75.181 (C 133) | ✅        | As of 2025-03-21 |
-| Android 14: Firefox 135            | ✅        | As of 2025-03-21 |
+### Windows 11
+
+| Browser                | Passing? | Note             |
+| ---------------------- | -------- | ---------------- |
+| Chrome 134             | ✅        | As of 2025-03-21 |
+| Firefox 136            | ✅        | As of 2025-03-21 |
+| Brave 1.76.80 (C 134)  | ✅        | As of 2025-03-21 |
+| ungoogled-chromium 123 | ✅        | As of 2025-03-21 |
+| LibreWolf 136          | ✅        | As of 2025-03-21 |
+| Mullvad 14.0.7 (F 128) | ✅        | As of 2025-03-21 |
+| Zen 1.10b (F 136)      | ✅        | As of 2025-03-21 |
+
+### Android 14
+
+| Browser                | Passing? | Note             |
+| ---------------------- | -------- | ---------------- |
+| Chrome 126             | ✅        | As of 2025-03-21 |
+| Brave 1.75.181 (C 133) | ✅        | As of 2025-03-21 |
+| Firefox 135            | ✅        | As of 2025-03-21 |
+
+### Current Versions of Browsers
+
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <th>Engine</th>
+    <th>Browser</th>
+    <th>Platform</th>
+    <th>Version</th>
+  </tr>
+  <tr>
+    <td>Chromium</td>
+    <td>Chromium</td>
+    <td>Desktop</td>
+    <td><img src="https://img.shields.io/github/v/tag/chromium/chromium"</td>
+  </tr>
+  <tr>
+    <td>Chromium</td>
+    <td>Ungoogled Chromium</td>
+    <td>Desktop</td>
+    <td><img src="https://img.shields.io/github/v/tag/Eloston/ungoogled-chromium"</td>
+  </tr>
+  <tr>
+    <td>Chromium</td>
+    <td>Brave</td>
+    <td>All</td>
+    <td><img src="https://img.shields.io/github/v/tag/brave/brave-browser"</td>
+  </tr>
+  <tr>
+    <td>Gecko</td>
+    <td>LibreWolf</td>
+    <td>Desktop</td>
+    <td><img src="https://img.shields.io/gitea/v/release/librewolf/source?gitea_url=https://codeberg.org"</td>
+  </tr>
+  <tr>
+    <td>Gecko</td>
+    <td>Mullvad</td>
+    <td>Desktop</td>
+    <td><img src="https://img.shields.io/github/v/tag/mullvad/mullvad-browser"</td>
+  </tr>
+  <tr>
+    <td>Gecko</td>
+    <td>Zen</td>
+    <td>Desktop</td>
+    <td><img src="https://img.shields.io/github/v/tag/zen-browser/desktop"</td>
+  </tr>
+</table>
+<!-- markdownlint-enable -->
 
 ***
 
-Developement of this project started on 2025-03-20.
+Developement of this project started 2025-03-20.
