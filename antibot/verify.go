@@ -4,40 +4,25 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 	"waffe/utils"
 
 	"gorm.io/gorm"
 )
 
 func VerifyHandler(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("BOT_TOKEN")
-	if err != nil {
-		http.Error(w, "Bot check failed", http.StatusTooManyRequests)
+	token := r.URL.Query().Get("token")
+	if !IsValidTokenForIP(db, utils.GetIP(r), token) {
+		http.Error(w, "Check failed (invalid token)", http.StatusTooManyRequests)
 		return
 	}
 
-	token := cookie.Value
-
-	tokenMutex.Lock()
-	expiry, exists := validTokens[token]
-	if exists {
-		delete(validTokens, token)
-	}
-	tokenMutex.Unlock()
-
-	if !exists || time.Now().After(expiry) {
-		http.Error(w, "Bot check failed (invalid)", http.StatusTooManyRequests)
-		return
-	}
+	SetClientVerified(db, utils.GetIP(r))
 
 	targetURL := r.URL.Query().Get("to")
 	if targetURL == "" {
-		http.Error(w, "Bot check failed (no target)", http.StatusTooManyRequests)
+		http.Error(w, "Check failed (no target)", http.StatusTooManyRequests)
 		return
 	}
-
-	AddClientToWhitelist(db, utils.GetIP(r))
 
 	decodedURL, err := url.QueryUnescape(targetURL)
 	if err != nil {

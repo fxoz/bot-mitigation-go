@@ -8,14 +8,9 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"sync"
-	"time"
 	"waffe/utils"
-)
 
-var (
-	validTokens = make(map[string]time.Time)
-	tokenMutex  = sync.Mutex{}
+	"gorm.io/gorm"
 )
 
 func generateRandomToken(n int) (string, error) {
@@ -26,28 +21,17 @@ func generateRandomToken(n int) (string, error) {
 	return hex.EncodeToString(b), nil
 }
 
-func BotProtectionHandler(w http.ResponseWriter, r *http.Request) {
+func BotProtectionHandler(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	token, err := generateRandomToken(16)
 	if err != nil {
 		http.Error(w, "Internal error generating token", http.StatusInternalServerError)
 		return
 	}
 
-	tokenMutex.Lock()
-	validTokens[token] = time.Now().Add(5 * time.Minute)
-	tokenMutex.Unlock()
-
-	cookie := &http.Cookie{
-		Name:     "BOT_TOKEN",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-	}
-	http.SetCookie(w, cookie)
-
 	originURL := utils.GetFullPath(r)
 	encodedURL := url.QueryEscape(originURL)
-	finalURL := fmt.Sprintf("/__verify?to=%s", encodedURL)
+	finalURL := fmt.Sprintf("/__verify?to=%s&token=%s", encodedURL, token)
+	AddClientToWhitelist(db, utils.GetIP(r), token)
 
 	html, err := os.ReadFile("assets/bot_protection/index.html")
 	if err != nil {

@@ -12,18 +12,16 @@ import (
 
 func onRequestHandler(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// fmt.Printf("-------------------\n%s %s\n", r.Method, r.URL.Path)
+		fmt.Printf("-------------------\n%s %s\n", r.Method, utils.GetFullPath(r))
 
-		notWhitelisted := !antibot.IsClientWhitelisted(db, utils.GetIP(r))
-
-		if notWhitelisted {
+		if !antibot.IsClientWhitelisted(db, utils.GetIP(r)) {
 			if !utils.IsHTMLRequest(r) {
 				http.Error(w, "Access denied", http.StatusForbidden)
 				return
 			}
 
 			fmt.Println("Protecting path:", r.URL.Path)
-			antibot.BotProtectionHandler(w, r)
+			antibot.BotProtectionHandler(db, w, r)
 			return
 		}
 
@@ -34,6 +32,7 @@ func onRequestHandler(db *gorm.DB) http.HandlerFunc {
 
 func verifyHandler(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Printf("-------------------\n%s %s\n", r.Method, utils.GetFullPath(r))
 		antibot.VerifyHandler(db, w, r)
 	}
 }

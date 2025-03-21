@@ -1,9 +1,10 @@
 server:
-  # proxy: localhost:9977
-  proxy: 0.0.0.0:9977
+  proxy: localhost:9977
+  # proxy: 0.0.0.0:9977
   origin: http://localhost:5000
   real_ip_header: X-Real-IP
 
 antibot:
   enabled: true
-  whitelist_for_seconds: 10
+  token_valid_for_seconds: 5
+  whitelist_valid_for_seconds: 10
