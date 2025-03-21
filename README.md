@@ -1,6 +1,6 @@
 # Anti-Bot Reverse Proxy Server in Go
 
-One of my first projects in Go: A reverse proxy server that detects bots and automated browsers. Inspired by Cloudflare, [Anubis](https://github.com/TecharoHQ/anubis) and - to some extend - by the [GrimAC anti-cheat plugin](https://github.com/GrimAnticheat/Grim).
+One of my first projects in Go: A reverse proxy server that detects bots and automated browsers. Inspired by *Cloudflare*, [*Anubis*](https://github.com/TecharoHQ/anubis) and - to some extend - by the [*GrimAC* anti-cheat plugin](https://github.com/GrimAnticheat/Grim).
 
 ## Features
 
