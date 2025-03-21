@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        function checkVideoCodecSupport(mimeTypeWithCodecs) {
+            const video = document.createElement("video");
+            return video.canPlayType(mimeTypeWithCodecs);
+        }
+
+        const mp4Codec = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+        const mp4Support = checkVideoCodecSupport(mp4Codec);
+        console.log("MP4 support:", mp4Support);
+    </script>
+</body>
+
+</html>

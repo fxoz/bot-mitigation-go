@@ -25,6 +25,7 @@ With LLM scrapers gaining popularity, bot mitigation is more important than ever
 - Manual CAPTCHA
   - Accessible (keyboard navigation, screen readers for visually impaired) but still robust; also low resource usage
 - SEO-friendiness (dummy pages for search engines)
+- Load balancing
 - Admin UI
 
 ## Protection
