@@ -40,21 +40,35 @@ The goal is to detect all of the following methods, especially automated browser
 - **UCD** - [ultrafunkamsterdam/undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver)
 - **PWS** - [AtuboDad/playwright_stealth](https://github.com/AtuboDad/playwright_stealth)
 
-| Method                      | Detected? | Comment                         |
-| --------------------------- | --------- | ------------------------------- |
-| Simple `curl` requests etc. | ✅         | Protection needs JS to function |
-| PW: Chrome                  | ✅         | As of 2025-03-21                |
-| PWS: WebKit                 | ✅         | As of 2025-03-21                |
-| UCD                         | ❌         | As of 2025-03-21                |
+### Regular browsers
+
+| Client                     | Detected? | Note                            |
+| -------------------------- | --------- | ------------------------------- |
+| Simple `curl` request etc. | ✅         | Protection needs JS to function |
+| PW: Chrome                 | ✅         | As of 2025-03-21                |
+
+### Browsers with evasion techniques
+
+| Client       | Detected? | Note                                                                                                |
+| ------------ | --------- | --------------------------------------------------------------------------------------------------- |
+| PWS: Chrome  | ✅         | Fails [`navigator.webdriver`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/webdriver) |
+| PWS: Firefox | ✅         | Fails [`navigator.userAgent`](https://caniuse.com/?search=navigator.userAgent)                      |
+| PWS: WebKit  | ✅         | Fails [`navigator.userAgent`](https://caniuse.com/?search=navigator.userAgent)                      |
+| UCD          | ❌         | As of 2025-03-21                                                                                    |
 
 ## Browser Compatibility
 
 It's really important to ensure that the bot protection doesn't break the website for legitimate users, even on older browsers. Please note that it's incredibly intricate to get the balance between security and compatibility right and that testing several browsers and their older versions takes a lot of time.
 
-| Browser                               | Working? | Comment          |
-| ------------------------------------- | -------- | ---------------- |
-| Windows: Brave 1.76.80 (Chromium 134) | ✅        | As of 2025-03-21 |
-| Windows: ungoogled-chromium 123       | ✅        | As of 2025-03-21 |
+| Browser                            | Passing? | Note             |
+| ---------------------------------- | -------- | ---------------- |
+| Windows: Brave 1.76.80 (C 134)     | ✅        | As of 2025-03-21 |
+| Windows: Chrome 134                | ✅        | As of 2025-03-21 |
+| Windows: ungoogled-chromium 123    | ✅        | As of 2025-03-21 |
+| Windows: Firefox 136               | ✅        | As of 2025-03-21 |
+| Android 14: Chrome 126             | ✅        | As of 2025-03-21 |
+| Android 14: Brave 1.75.181 (C 133) | ✅        | As of 2025-03-21 |
+| Android 14: Firefox 135            | ✅        | As of 2025-03-21 |
 
 ***
 

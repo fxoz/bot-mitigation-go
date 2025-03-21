@@ -12,27 +12,46 @@ function checkVideoCodecSupport(mimeTypeWithCodecs) {
 }
 
 function main() {
+    statusText.innerText = 'Starting';
+
     if (navigator.webdriver) {
+        statusText.innerText = 'Failed navigator.webdriver';
         return botDetected();
     }
+    statusText.innerText = 'Passed navigator.webdriver';
 
     if (!!(window.__driver_unwrapped || window.__webdriver_script_fn)) {
+        statusText.innerText = 'Failed window attributes';
         return botDetected();
     }
+    statusText.innerText = 'Passed window attributes';
+
+    try {
+        navigator.userAgent
+    } catch {
+        statusText.innerText = 'Failed user agent (exist)';
+        return botDetected();
+    }
+    statusText.innerText = 'Passed user agent (exist)';
 
     if (navigator.userAgent.includes("Chrome") && !window.chrome) {
+        statusText.innerText = 'Failed chrome spoofing';
         return botDetected();
     }
+    statusText.innerText = 'Passed chrome spoofing';
 
     if (navigator.userAgent.includes("Headless")) {
+        statusText.innerText = 'Failed user agent (headless)';
         return botDetected();
     }
+    statusText.innerText = 'Passed user agent (headless)';
 
     if (checkVideoCodecSupport('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') === "") {
+        statusText.innerText = 'Failed codec';
         return botDetected();
     }
 
-    window.location.href = '{-URL-}';
+    statusText.innerText = 'Passed';
 }
 
 document.addEventListener('DOMContentLoaded', function () {

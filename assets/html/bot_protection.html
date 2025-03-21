@@ -17,12 +17,16 @@
 
         body {
             padding: 0;
+            background-color: #121212;
+            color: #fff;
+            text-align: center;
+        }
+
+        main {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #121212;
-            color: #fff;
+            height: 80vh;
         }
 
         @media (prefers-color-scheme: light) {
@@ -41,6 +45,9 @@
     <main id="mainBot" style="display: none;">
         <h1>Bot detected!</h1>
     </main>
+    <footer>
+        Status: <span id="statusText">Unknown</span>
+    </footer>
     //JS//
 </body>
 
