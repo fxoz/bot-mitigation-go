@@ -8,7 +8,7 @@ function botDetected() {
 
 function passed() {
     statusText.innerText = 'Passed';
-    window.location.href = '{-URL-}';
+    window.location.href = '/__verify';
 }
 
 function main() {

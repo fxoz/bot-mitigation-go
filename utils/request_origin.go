@@ -29,3 +29,8 @@ func RequestOrigin(responseWriter http.ResponseWriter, originRequest *http.Reque
 		}
 	}
 }
+
+func IsOriginAlive(origin string) bool {
+	_, err := http.Get(origin)
+	return err == nil
+}

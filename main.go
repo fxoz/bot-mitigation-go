@@ -7,6 +7,7 @@ import (
 	"waffe/antibot"
 	"waffe/utils"
 
+	"github.com/fatih/color"
 	"gorm.io/gorm"
 )
 
@@ -40,12 +41,20 @@ func verifyHandler(db *gorm.DB) http.HandlerFunc {
 func main() {
 	cfg := utils.LoadConfig("config.yml")
 	db := antibot.InitDB()
+	color.Green("Initialized database")
+
+	if !utils.IsOriginAlive(cfg.Server.Origin) {
+		color.Red("Origin server is not reachable! Exiting...")
+		color.Red("Please check your origin server address in the config file and make sure it has started.")
+		return
+	}
+	color.Green("Origin server is reachable")
 
 	http.HandleFunc("/__verify", verifyHandler(db))
 	http.HandleFunc("/__verify/", verifyHandler(db))
 	http.HandleFunc("/", onRequestHandler(db))
 
-	fmt.Printf("Server running at http://%s\n", cfg.Server.Proxy)
-	fmt.Printf("Private IP: %s\n", utils.GetPrivateIP())
+	color.Green("Server running at http://%s\n", cfg.Server.Proxy)
+	color.Blue("Private IP: %s\n", utils.GetPrivateIP())
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(cfg.Server.Proxy), nil))
 }
