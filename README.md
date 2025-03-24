@@ -8,17 +8,30 @@ One of my first projects in Go: A reverse proxy server that detects bots and aut
 
 With LLM scrapers gaining popularity, bot mitigation is more important than ever. This experimental project aims to provide a high-performance, scalable and easy-to-use solution for bot detection and mitigation.
 
-## Features
+## Key Principles
 
-- Very quick, automated bot detection (JavaScript-based)
-- Configurable using yml.
+- Lightning fast, **automated bot/spam detection** (JavaScript-based)
+- Extensively **configurable options**
 - Designed to prevent even automated browsers with additional bot detection protections like `playwright_stealth` and `undetected-chromedriver`
-- Written in Go to ensure high performance and scalability
+- Written in Go to ensure **high performance and scalability**
 - Tested on various browsers and platforms, see below
   - Niche browsers like *Mullvad* are tested as well, since privacy-focused browsers sometimes break websites
 
+## Installation
+
+***Not available since the project is still in development.***
+
+## Implemented Features
+
+Unless otherwise noted, all configuration options formatted `like_so` can be changed in the `config.json` file.
+
+- JavaScript-based detection of automated browsers
+  - Naturally, no requests are sent to the origin server until the client has been verified
+- Origin server is checked before startup
+
 ### Planned
 
+- ⚠️ Ensure that forms (+ cookie-setting web pages) work correctly, even when the bot protection is triggered
 - Webkit testing
 - Microsoft Edge testing
 - iOS/MacOS testing
@@ -44,6 +57,7 @@ The goal is to detect all of the following methods, especially automated browser
 - **UCD** - [ultrafunkamsterdam/undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver)
 - **PWS** - [AtuboDad/playwright_stealth](https://github.com/AtuboDad/playwright_stealth)
 - **TFP** - [tinyfish-io/tf-playwright-stealth](https://github.com/tinyfish-io/tf-playwright-stealth) (fork of `playwright_stealth`)
+- Planned: https://github.com/VeNoMouS/cloudscraper
 
 *Detected:* If the bot protection flags a client as a bot.
 Unless otherwise noted, **headful** mode is used, since headless mode can be detected easier.

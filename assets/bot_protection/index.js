@@ -1,66 +1,38 @@
-let isBot = false;
-
-function botDetected() {
-    isBot = true;
-    mainLoading.style.display = 'none';
-    mainBot.style.display = 'block';
-}
-
-function passed() {
-    statusText.innerText = 'Passed';
-    window.location.href = '/__verify';
-}
-
 function main() {
-    statusText.innerText = 'Starting';
-
-    if (navigator.webdriver) {
-        statusText.innerText = 'Failed navigator.webdriver';
-        return botDetected();
-    }
-    statusText.innerText = 'Passed navigator.webdriver';
-
-    if (window.__driver_unwrapped || window.__webdriver_script_fn || window.__driver_evaluate) {
-        statusText.innerText = 'Failed window globals';
-        return botDetected();
-    }
-    statusText.innerText = 'Passed window globals';
-
-    if (navigator.userAgent.includes("Headless")) {
-        statusText.innerText = 'Failed user agent (headless)';
-        return botDetected();
-    }
-    statusText.innerText = 'Passed user agent (headless)';
-
-    //! Experimental
+    userAgentFails = false;
+    reportedUserAgent = null;
     try {
         navigator.userAgent
     } catch {
-        statusText.innerText = 'Failed user agent (exist)';
-        return botDetected();
+        userAgentFails = true;
     }
-    statusText.innerText = 'Passed user agent (exist)';
 
-    if (navigator.userAgent.includes("Chrome") && !window.chrome) {
-        statusText.innerText = 'Failed chrome spoofing';
-        return botDetected();
+    const res = {
+        userAgentFails: userAgentFails,
+        usesWebDriver: !!navigator.webdriver,
+        susProperties: window.__driver_unwrapped || window.__webdriver_script_fn || window.__driver_evaluate,
+        usesHeadlessChrome: navigator.userAgent.includes("Headless"),
+        chromeDiscrepancy: navigator.userAgent.includes("Chrome") && !window.chrome,
+        lackingCodecSupport: document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') === "",
+        playwrightStealthPixelRatio: window.devicePixelRatio === 1.0000000149011612,
+        reportedUserAgent: reportedUserAgent,
     }
-    statusText.innerText = 'Passed chrome spoofing';
 
-    if (document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') === "") {
-        statusText.innerText = 'Failed codec';
-        return botDetected();
-    }
-    statusText.innerText = 'Passed codec';
-
-    //? tf-playwright-stealth
-    if (window.devicePixelRatio === 1.0000000149011612) {
-        statusText.innerText = 'Failed device pixel ratio';
-        return botDetected();
-    }
-    statusText.innerText = 'Passed device pixel ratio';
-
-    passed();
+    fetch("/.__/api/__judge", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(res)
+    }).then(response => response.json()).then(data => {
+        if (data.verified) {
+            window.location.reload();
+        } else {
+            alert("Your browser is not supported. Please use a different browser to access this page.");
+        }
+    }).catch(() => {
+        alert("A critical error occurred while checking your browser!");
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {

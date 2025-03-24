@@ -14,8 +14,7 @@ func ProcessRequest(r *http.Request) *http.Request {
 
 	req.Header = r.Header.Clone()
 
-	clientIP := r.RemoteAddr
-	req.Header.Add(cfg.Server.RealIpHeader, clientIP)
+	req.Header.Add(cfg.Server.RealIpHeader, GetIP(r))
 
 	return req
 }

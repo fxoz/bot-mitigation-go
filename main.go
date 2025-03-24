@@ -15,14 +15,18 @@ func onRequestHandler(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("-------------------\n%s %s\n", r.Method, utils.GetFullPath(r))
 
-		if !antibot.IsClientWhitelisted(db, utils.GetIP(r)) {
+		if antibot.NeedsVerification(db, utils.GetIP(r)) {
 			if !utils.IsHTMLRequest(r) {
 				http.Error(w, "Access denied", http.StatusForbidden)
 				return
 			}
 
-			fmt.Println("Protecting path:", r.URL.Path)
-			antibot.BotProtectionHandler(db, w, r)
+			antibot.StartJavaScriptVerification(db, w, r)
+			return
+		}
+
+		if !antibot.IsClientVerified(db, utils.GetIP(r)) {
+			http.Error(w, "Checks falied", http.StatusForbidden)
 			return
 		}
 
@@ -31,15 +35,15 @@ func onRequestHandler(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
-func verifyHandler(db *gorm.DB) http.HandlerFunc {
+func judgeHandler(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("-------------------\n%s %s\n", r.Method, utils.GetFullPath(r))
-		antibot.VerifyHandler(db, w, r)
+		antibot.JudgeClient(db, w, r)
 	}
 }
 
 func main() {
 	cfg := utils.LoadConfig("config.yml")
+	color.Green("Loaded config file")
 	db := antibot.InitDB()
 	color.Green("Initialized database")
 
@@ -50,8 +54,7 @@ func main() {
 	}
 	color.Green("Origin server is reachable")
 
-	http.HandleFunc("/__verify", verifyHandler(db))
-	http.HandleFunc("/__verify/", verifyHandler(db))
+	http.HandleFunc("/.__/api/__judge", judgeHandler(db))
 	http.HandleFunc("/", onRequestHandler(db))
 
 	color.Green("Server running at http://%s\n", cfg.Server.Proxy)

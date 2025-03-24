@@ -20,9 +20,9 @@ type ServerConfig struct {
 }
 
 type AntiBotConfig struct {
-	Enabled                  bool `yaml:"enabled"`
-	TokenValidForSeconds     int  `yaml:"token_valid_for_seconds"`
-	WhitelistValidForSeconds int  `yaml:"whitelist_valid_for_seconds"`
+	Enabled                     bool `yaml:"enabled"`
+	Threshold                   int  `yaml:"threshold"`
+	VerificationValidForSeconds int  `yaml:"verification_valid_for_seconds"`
 }
 
 var (

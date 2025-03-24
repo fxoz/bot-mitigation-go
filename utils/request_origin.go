@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/fatih/color"
 )
 
 func RequestOrigin(responseWriter http.ResponseWriter, originRequest *http.Request) {
+	color.Yellow("Requesting origin server: %s %s", originRequest.Method, originRequest.URL)
 	client := &http.Client{}
 	resp, err := client.Do(originRequest)
 	if err != nil {

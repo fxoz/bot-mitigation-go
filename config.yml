@@ -1,10 +1,20 @@
 server:
   proxy: localhost:9977
   # proxy: 0.0.0.0:9977
-  origin: http://localhost:5000
+
+  # The server that receives authentic requests from the proxy server
+  origin: http://localhost:9812
+
+  # Header that contains the IP address of the client
   real_ip_header: X-Real-IP
 
 antibot:
+  # Anti-Bot is a set of JavaScript checks that is used to verify the authenticity of the client.
   enabled: true
-  token_valid_for_seconds: 5
-  whitelist_valid_for_seconds: 10
+
+  # 1000 = 100% certain that the client is a bot
+  threshold: 500
+
+  # During this time, no checks will be performed for the client
+  # Can be very low for testing, but should be rather high for production
+  verification_valid_for_seconds: 10
