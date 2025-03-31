@@ -81,11 +81,11 @@ func JudgeClient(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 	AddClient(db, utils.GetIP(r))
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
 	if score >= cfg.AntiBot.Threshold {
 		color.Red("Client score: %d above threshold (%d)", score, cfg.AntiBot.Threshold)
 		color.Red("This would trigger a CAPTCHA challenge")
-		w.WriteHeader(http.StatusForbidden)
 
 		json.NewEncoder(w).Encode(
 			ChecksResponse{
@@ -95,7 +95,6 @@ func JudgeClient(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	SetClientVerified(db, utils.GetIP(r))
 
 	color.Green("Client score: %d below threshold (%d)", score, cfg.AntiBot.Threshold)

@@ -28,7 +28,7 @@ function main() {
         if (data.verified) {
             window.location.reload();
         } else {
-            alert("Your browser is not supported. Please use a different browser to access this page.");
+            window.location.href = "/.__captcha/";
         }
     }).catch(() => {
         alert("A critical error occurred while checking your browser!");

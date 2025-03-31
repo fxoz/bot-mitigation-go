@@ -2,10 +2,14 @@ import html
 import flask
 
 app = flask.Flask(__name__)
+i = 0
 
 
 @app.route("/")
 def index():
+    global i
+    i += 1
+    print(i)
     return "Hello, World!"
 
 
