@@ -33,6 +33,7 @@ Unless otherwise noted, all configuration options formatted `like_so` can be cha
 
 ### Planned
 
+- ♻️ Automated compatibility tests for browsers (to ensure no common browser is accidently detected as a bot etc.)
 - ⚠️ Ensure that forms (+ cookie-setting web pages) work correctly, even when the bot protection is triggered
 - Webkit testing
 - Microsoft Edge testing
