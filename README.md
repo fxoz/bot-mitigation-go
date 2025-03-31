@@ -1,5 +1,7 @@
 # Anti-Bot Reverse Proxy Server in Go
 
+***✅ Info: A re-write using Fiber is planned. This should greatly improve the performance and scalability.***
+
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/fxoz/bot-mitigation-go/codeql.yml)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/fxoz/bot-mitigation-go)
 ![GitHub License](https://img.shields.io/github/license/fxoz/bot-mitigation-go)
