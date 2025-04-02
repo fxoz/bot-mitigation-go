@@ -18,3 +18,6 @@ antibot:
   # During this time, no checks will be performed for the client
   # Can be very low for testing, but should be rather high for production
   verification_valid_for_seconds: 10
+
+other:
+  obfuscate_javascript: true

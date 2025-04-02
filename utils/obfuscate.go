@@ -1,4 +1,4 @@
-package antibot
+package utils
 
 import (
 	"encoding/base64"

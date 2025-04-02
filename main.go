@@ -21,7 +21,7 @@ func onRequestHandler(db *gorm.DB) http.HandlerFunc {
 				return
 			}
 
-			antibot.StartJavaScriptVerification(db, w, r)
+			utils.RenderPage("bot_protection", w, r)
 			return
 		}
 
@@ -41,6 +41,12 @@ func judgeHandler(db *gorm.DB) http.HandlerFunc {
 	}
 }
 
+func captchaHandler(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		utils.RenderPage("captcha", w, r)
+	}
+}
+
 func main() {
 	cfg := utils.LoadConfig("config.yml")
 	color.Green("Loaded config file")
@@ -55,6 +61,7 @@ func main() {
 	color.Green("Origin server is reachable")
 
 	http.HandleFunc("/.__/api/__judge", judgeHandler(db))
+	http.HandleFunc("/.__captcha", captchaHandler(db))
 	http.HandleFunc("/", onRequestHandler(db))
 
 	color.Green("Server running at http://%s\n", cfg.Server.Proxy)

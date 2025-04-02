@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Server  ServerConfig  `yaml:"server"`
 	AntiBot AntiBotConfig `yaml:"antibot"`
+	Other   OtherConfig   `yaml:"other"`
 }
 
 type ServerConfig struct {
@@ -25,13 +26,15 @@ type AntiBotConfig struct {
 	VerificationValidForSeconds int  `yaml:"verification_valid_for_seconds"`
 }
 
+type OtherConfig struct {
+	ObfuscateJavaScript bool `yaml:"obfuscate_javascript"`
+}
+
 var (
 	config *Config
 	once   sync.Once
 )
 
-// LoadConfig reads the YAML configuration from the specified file.
-// The configuration is loaded only once.
 func LoadConfig(filePath string) *Config {
 	once.Do(func() {
 		data, err := os.ReadFile(filePath)
