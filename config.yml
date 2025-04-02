@@ -1,11 +1,14 @@
+transfer:
+  compress: true
+  timeout_seconds: 60
+  timeout_idle_seconds: 60
+
 server:
   proxy: localhost:9977
   # proxy: 0.0.0.0:9977
 
-  # The server that receives authentic requests from the proxy server
+  # The server that receives the requests from the proxy server
   origin: http://localhost:9812
-
-  # Header that contains the IP address of the client
   real_ip_header: X-Real-IP
 
 antibot:

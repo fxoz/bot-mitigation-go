@@ -1,20 +1,18 @@
 package utils
 
 import (
-	"net/http"
-	"path"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
 )
 
-func IsHTMLRequest(r *http.Request) bool {
-	if r.Method != http.MethodGet && r.Method != http.MethodPost {
+func IsHTMLRequest(c *fiber.Ctx) bool {
+	method := c.Method()
+	if method != fiber.MethodGet && method != fiber.MethodPost {
 		return false
 	}
-
-	if accept := r.Header.Get("Accept"); strings.Contains(accept, "text/html") {
+	if strings.Contains(c.Get("Accept"), "text/html") {
 		return true
 	}
-
-	ext := path.Ext(r.URL.Path)
-	return ext == "" || ext == ".html"
+	return strings.HasSuffix(c.Path(), ".html")
 }

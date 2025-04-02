@@ -9,9 +9,16 @@ import (
 )
 
 type Config struct {
-	Server  ServerConfig  `yaml:"server"`
-	AntiBot AntiBotConfig `yaml:"antibot"`
-	Other   OtherConfig   `yaml:"other"`
+	Transfer TransferConfig `yaml:"transfer"`
+	Server   ServerConfig   `yaml:"server"`
+	AntiBot  AntiBotConfig  `yaml:"antibot"`
+	Other    OtherConfig    `yaml:"other"`
+}
+
+type TransferConfig struct {
+	Compress           bool `yaml:"compress"`
+	TimeoutSeconds     int  `yaml:"timeout_seconds"`
+	TimeoutIdleSeconds int  `yaml:"timeout_idle_seconds"`
 }
 
 type ServerConfig struct {

@@ -1,70 +1,74 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 	"waffe/antibot"
 	"waffe/utils"
 
 	"github.com/fatih/color"
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
-func onRequestHandler(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("-------------------\n%s %s\n", r.Method, utils.GetFullPath(r))
+func onRequestHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		if c.Path() == "/.__captcha" || c.Path() == "/.__/api/__judge" {
+			return c.Next()
+		}
 
-		if antibot.NeedsVerification(db, utils.GetIP(r)) {
-			if !utils.IsHTMLRequest(r) {
-				http.Error(w, "Access denied", http.StatusForbidden)
-				return
+		ip := c.IP()
+		if antibot.NeedsVerification(db, ip) {
+			if !utils.IsHTMLRequest(c) {
+				return c.Status(fiber.StatusForbidden).SendString("Access denied")
 			}
-
-			utils.RenderPage("bot_protection", w, r)
-			return
+			return utils.RenderPage("bot_protection", c)
 		}
 
-		if !antibot.IsClientVerified(db, utils.GetIP(r)) {
-			http.Error(w, "Checks falied", http.StatusForbidden)
-			return
+		if !antibot.IsClientVerified(db, ip) {
+			return c.Status(fiber.StatusForbidden).SendString("Checks failed")
 		}
 
-		originRequest := utils.ProcessRequest(r)
-		utils.RequestOrigin(w, originRequest)
+		if err := utils.RequestOrigin(c); err != nil {
+			return c.Status(fiber.StatusInternalServerError).SendString("Error processing request")
+		}
+
+		return nil
 	}
 }
 
-func judgeHandler(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		antibot.JudgeClient(db, w, r)
-	}
-}
-
-func captchaHandler(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		utils.RenderPage("captcha", w, r)
+func captchaHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		return utils.RenderPage("captcha", c)
 	}
 }
 
 func main() {
 	cfg := utils.LoadConfig("config.yml")
-	color.Green("Loaded config file")
 	db := antibot.InitDB()
-	color.Green("Initialized database")
 
 	if !utils.IsOriginAlive(cfg.Server.Origin) {
-		color.Red("Origin server is not reachable! Exiting...")
-		color.Red("Please check your origin server address in the config file and make sure it has started.")
+		if !fiber.IsChild() {
+			color.Red("Origin server is not reachable! Exiting...")
+		}
 		return
 	}
-	color.Green("Origin server is reachable")
 
-	http.HandleFunc("/.__/api/__judge", judgeHandler(db))
-	http.HandleFunc("/.__captcha", captchaHandler(db))
-	http.HandleFunc("/", onRequestHandler(db))
+	if !fiber.IsChild() {
+		color.Green("Loaded config file")
+		color.Green("Initialized database")
+		color.Green("Origin server is reachable")
+		color.Green("Server running at http://%s", cfg.Server.Proxy)
+		color.Blue("Private IP: %s", utils.GetPrivateIP())
+	}
 
-	color.Green("Server running at http://%s\n", cfg.Server.Proxy)
-	color.Blue("Private IP: %s\n", utils.GetPrivateIP())
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(cfg.Server.Proxy), nil))
+	app := fiber.New(fiber.Config{
+		// Prefork: true,
+	})
+
+	// app.Use(logger.New())
+	app.Post("/.__/api/__judge", antibot.JudgeClient(db))
+	app.Get("/.__captcha", captchaHandler(db))
+	app.All("/*", onRequestHandler(db))
+
+	log.Fatal(app.Listen(cfg.Server.Proxy))
 }

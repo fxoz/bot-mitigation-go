@@ -1,7 +1,5 @@
 # Anti-Bot Reverse Proxy Server in Go
 
-***✅ Info: A re-write using Fiber is planned. This should greatly improve the performance and scalability.***
-
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/fxoz/bot-mitigation-go/codeql.yml)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/fxoz/bot-mitigation-go)
 ![GitHub License](https://img.shields.io/github/license/fxoz/bot-mitigation-go)
@@ -16,6 +14,7 @@ With LLM scrapers gaining popularity, bot mitigation is more important than ever
 - Extensively **configurable options**
 - Designed to prevent even automated browsers with additional bot detection protections like `playwright_stealth` and `undetected-chromedriver`
 - Written in Go to ensure **high performance and scalability**
+  - ✅ Now re-written in Fiber for even better performance! (~2x faster, more optimizations planned)
 - Tested on various browsers and platforms, see below
   - Niche browsers like *Mullvad* are tested as well, since privacy-focused browsers sometimes break websites
 
@@ -45,6 +44,10 @@ Unless otherwise noted, all configuration options formatted `like_so` can be cha
 - SSL(?)
 - Caching
 - Ratelimits
+- Timeout handling, also needs testing
+- Proper logging
+- Custom error pages
+- Custom filters
 - Anti-DDoS
 - Manual CAPTCHA
   - Accessible (keyboard navigation, screen readers for visually impaired) but still robust; also low resource usage
@@ -60,7 +63,7 @@ The goal is to detect all of the following methods, especially automated browser
 - **UCD** - [ultrafunkamsterdam/undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver)
 - **PWS** - [AtuboDad/playwright_stealth](https://github.com/AtuboDad/playwright_stealth)
 - **TFP** - [tinyfish-io/tf-playwright-stealth](https://github.com/tinyfish-io/tf-playwright-stealth) (fork of `playwright_stealth`)
-- Planned: https://github.com/VeNoMouS/cloudscraper
+- Planned: [VeNoMouS/cloudscraper](https://github.com/VeNoMouS/cloudscraper)
 
 *Detected:* If the bot protection flags a client as a bot.
 Unless otherwise noted, **headful** mode is used, since headless mode can be detected easier.
@@ -158,6 +161,27 @@ It's really important to ensure that the bot protection doesn't break the websit
   </tr>
 </table>
 <!-- markdownlint-enable -->
+
+## Fiber Rewrite
+
+Stress test performance results.
+
+```bash
+autocannon -c 100 -d 30 -p 10 http://localhost:9977
+```
+
+### Before
+
+![Screenshot of a performance benchmark result using "autocannon" of the server before the Fiber rewrite](readme_assets/perf-pre-fiber.png)
+
+### After (~2x faster)
+
+![alt text](readme_assets/perf-fiber.png)
+
+I'm fairly certain that now, the bottleneck is due to the way anti-bot protection is implemented.
+The HTTP server itself is now highly optimized.
+
+Moreover, caching and other performance optimizations are planned.
 
 ***
 

@@ -1,106 +1,71 @@
 package antibot
 
 import (
-	"encoding/json"
-	"io"
-	"net/http"
 	"waffe/utils"
 
-	"github.com/fatih/color"
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
 type Checks struct {
-	UserAgentFails              bool `json:"userAgentFails"`
-	UsesWebDriver               bool `json:"usesWebDriver"`
-	SusProperties               bool `json:"susProperties"`
-	UsesHeadlessChrome          bool `json:"usesHeadlessChrome"`
-	ChromeDiscrepancy           bool `json:"chromeDiscrepancy"`
-	LackingCodecSupport         bool `json:"lackingCodecSupport"`
-	PlaywrightStealthPixelRatio bool `json:"playwrightStealthPixelRatio"`
-	ReportedUserAgent           string
+	UserAgentFails              bool   `json:"userAgentFails"`
+	UsesWebDriver               bool   `json:"usesWebDriver"`
+	SusProperties               bool   `json:"susProperties"`
+	UsesHeadlessChrome          bool   `json:"usesHeadlessChrome"`
+	ChromeDiscrepancy           bool   `json:"chromeDiscrepancy"`
+	LackingCodecSupport         bool   `json:"lackingCodecSupport"`
+	PlaywrightStealthPixelRatio bool   `json:"playwrightStealthPixelRatio"`
+	ReportedUserAgent           string `json:"reportedUserAgent"`
 }
 
 type ChecksResponse struct {
 	Verified bool `json:"verified"`
 }
 
-func JudgeClient(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+func JudgeClient(db *gorm.DB) fiber.Handler {
 	cfg := utils.LoadConfig("config.yml")
+	return func(c *fiber.Ctx) error {
+		if c.Method() != fiber.MethodPost {
+			return fiber.NewError(fiber.StatusMethodNotAllowed, "Invalid request method")
+		}
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
-	}
+		var checks Checks
+		if err := c.BodyParser(&checks); err != nil {
+			return fiber.NewError(fiber.StatusBadRequest, "Invalid JSON format")
+		}
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusInternalServerError)
-		return
-	}
-	defer r.Body.Close()
-
-	var c Checks
-	err = json.Unmarshal(body, &c)
-	if err != nil {
-		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
-		return
-	}
-
-	score := 0
-
-	// score >=1000: it is 100% certain that the client is a bot
-
-	if c.UserAgentFails {
-		score += 100
-	}
-	if c.UsesWebDriver {
-		score += 1000
-	}
-	if c.SusProperties {
-		score += 1000
-	}
-	if c.UsesHeadlessChrome {
-		score += 1000
-	}
-	if c.ChromeDiscrepancy {
-		score += 400
-	}
-	if c.LackingCodecSupport {
-		score += 300
-	}
-	if c.PlaywrightStealthPixelRatio {
-		score += 1000
-	}
-	if !c.UserAgentFails && c.ReportedUserAgent != "" {
-		if c.ReportedUserAgent != r.UserAgent() {
+		score := 0
+		if checks.UserAgentFails {
+			score += 100
+		}
+		if checks.UsesWebDriver {
+			score += 1000
+		}
+		if checks.SusProperties {
+			score += 1000
+		}
+		if checks.UsesHeadlessChrome {
+			score += 1000
+		}
+		if checks.ChromeDiscrepancy {
+			score += 400
+		}
+		if checks.LackingCodecSupport {
+			score += 300
+		}
+		if checks.PlaywrightStealthPixelRatio {
+			score += 1000
+		}
+		if !checks.UserAgentFails && checks.ReportedUserAgent != "" && checks.ReportedUserAgent != c.Get("User-Agent") {
 			score += 700
 		}
+
+		AddClient(db, c.IP())
+		if score >= cfg.AntiBot.Threshold {
+			return c.Status(fiber.StatusOK).JSON(ChecksResponse{Verified: false})
+		}
+
+		SetClientVerified(db, c.IP())
+		return c.Status(fiber.StatusOK).JSON(ChecksResponse{Verified: true})
 	}
-
-	AddClient(db, utils.GetIP(r))
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	if score >= cfg.AntiBot.Threshold {
-		color.Red("Client score: %d above threshold (%d)", score, cfg.AntiBot.Threshold)
-		color.Red("This would trigger a CAPTCHA challenge")
-
-		json.NewEncoder(w).Encode(
-			ChecksResponse{
-				Verified: false,
-			},
-		)
-		return
-	}
-
-	SetClientVerified(db, utils.GetIP(r))
-
-	color.Green("Client score: %d below threshold (%d)", score, cfg.AntiBot.Threshold)
-	json.NewEncoder(w).Encode(
-		ChecksResponse{
-			Verified: true,
-		},
-	)
 }
