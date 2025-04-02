@@ -1,5 +1,7 @@
 # Anti-Bot Reverse Proxy Server in Go
 
+***✅ Info: A re-write using Fiber is planned. This should greatly improve the performance and scalability.***
+
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/fxoz/bot-mitigation-go/codeql.yml)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/fxoz/bot-mitigation-go)
 ![GitHub License](https://img.shields.io/github/license/fxoz/bot-mitigation-go)
@@ -31,6 +33,7 @@ Unless otherwise noted, all configuration options formatted `like_so` can be cha
 
 ### Planned
 
+- ♻️ Automated compatibility tests for browsers (to ensure no common browser is accidently detected as a bot etc.)
 - ⚠️ Ensure that forms (+ cookie-setting web pages) work correctly, even when the bot protection is triggered
 - Webkit testing
 - Microsoft Edge testing
