@@ -25,8 +25,9 @@ func getClient(db *gorm.DB, clientIP string) (*CheckedClient, error) {
 	return &client, err
 }
 
+var cfg = utils.LoadConfig("config.yml")
+
 func NeedsVerification(db *gorm.DB, clientIP string) bool {
-	cfg := utils.LoadConfig("config.yml")
 	client, err := getClient(db, clientIP)
 	if err != nil {
 		return true
@@ -41,7 +42,6 @@ func NeedsVerification(db *gorm.DB, clientIP string) bool {
 }
 
 func IsClientVerified(db *gorm.DB, clientIP string) bool {
-	cfg := utils.LoadConfig("config.yml")
 	client, err := getClient(db, clientIP)
 	if err != nil || !client.IsVerified || client.PassedAtUnix == nil {
 		return false

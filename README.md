@@ -22,6 +22,16 @@ With LLM scrapers gaining popularity, bot mitigation is more important than ever
 
 ***Not available since the project is still in development.***
 
+Requirements:
+
+- Go and its dependencies
+- For testing: Python 3, Playwright and other packages (depending on the test)
+
+A basic testing environment can be launched like so:
+
+- `py testing/_server.py`
+- `go run .`
+
 ## Implemented Features
 
 Unless otherwise noted, all configuration options formatted `like_so` can be changed in the `config.json` file.
