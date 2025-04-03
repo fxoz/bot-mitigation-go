@@ -1,4 +1,4 @@
-# Anti-Bot Reverse Proxy Server in Go
+# Anti-Bot Reverse Proxy
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/fxoz/bot-mitigation-go/codeql.yml)
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/fxoz/bot-mitigation-go)
@@ -6,7 +6,9 @@
 
 One of my first projects in Go: A reverse proxy server that detects bots and automated browsers. Inspired by *Cloudflare*, [*Anubis*](https://github.com/TecharoHQ/anubis) and - to some extent - by the [*GrimAC* anti-cheat plugin](https://github.com/GrimAnticheat/Grim).
 
-With LLM scrapers gaining popularity, bot mitigation is more important than ever. This experimental project aims to provide a high-performance, scalable and easy-to-use solution for bot detection and mitigation.
+With LLM scrapers gaining popularity, bot mitigation is more important than ever. This experimental project aims to provide a high-performance, scalable and easy-to-use solution for bot detection and mitigation. 🔥
+
+I rewrote the server several times to ensure excellent performance under high concurrency. On my Windows 11 & Ryzen 5 5600X PC, the server can handle over **100,000 requests per second** with an average latency of **0.5 ms**.
 
 ## Key Principles
 
@@ -14,7 +16,6 @@ With LLM scrapers gaining popularity, bot mitigation is more important than ever
 - Extensively **configurable options**
 - Designed to prevent even automated browsers with additional bot detection protections like `playwright_stealth` and `undetected-chromedriver`
 - Written in Go to ensure **high performance and scalability**
-  - ✅ Now re-written in Fiber for even better performance! (~2x faster, more optimizations planned)
 - Tested on various browsers and platforms, see below
   - Niche browsers like *Mullvad* are tested as well, since privacy-focused browsers sometimes break websites
 
@@ -31,6 +32,13 @@ A basic testing environment can be launched like so:
 
 - `py testing/_server.py`
 - `go run .`
+
+### High Performance Build
+
+```bash
+go build -trimpath -ldflags="-s -w" -o _built_server.exe main.go
+./_built_server.exe
+```
 
 ## Implemented Features
 
@@ -172,26 +180,50 @@ It's really important to ensure that the bot protection doesn't break the websit
 </table>
 <!-- markdownlint-enable -->
 
-## Fiber Rewrite
+## Benchmark
 
-Stress test performance results.
+Stress test performance results, unless otherwise noted, are from my PC:
+
+- Windows 11
+- Ryzen 5 5600X
 
 ```bash
 autocannon -c 100 -d 30 -p 10 http://localhost:9977
 ```
 
-### Before
+### Before any rewrites
 
 ![Screenshot of a performance benchmark result using "autocannon" of the server before the Fiber rewrite](readme_assets/perf-pre-fiber.png)
 
-### After (~2x faster)
+### Fiber rewrite (~2x faster)
 
-![alt text](readme_assets/perf-fiber.png)
+![Perf. after Fiber rewrite](readme_assets/perf-fiber.png)
 
-I'm fairly certain that now, the bottleneck is due to the way anti-bot protection is implemented.
-The HTTP server itself is now highly optimized.
+### Database rewrite (~3x faster)
 
-Moreover, caching and other performance optimizations are planned.
+![Perf. after database rewrite](readme_assets/perf-db-rewrite.png)
+
+Running:
+
+```bash
+.\hey_windows_amd64.exe -n 1000 -z 5s http://localhost:9977
+```
+
+...returns:
+
+```txt
+Summary:
+  Total:        5.0007 secs
+  Slowest:      0.3196 secs
+  Fastest:      0.0001 secs
+  Average:      0.0005 secs
+  Requests/sec: 105054.6273
+
+  Total data:   6829446 bytes
+  Size/request: 13 bytes
+```
+
+...With similar results for `-n 50000`.
 
 ***
 

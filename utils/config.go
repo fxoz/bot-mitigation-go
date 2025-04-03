@@ -22,9 +22,20 @@ type TransferConfig struct {
 }
 
 type ServerConfig struct {
+	UseProfiler  bool   `yaml:"use_profiler"`
 	Proxy        string `yaml:"proxy"`
 	Origin       string `yaml:"origin"`
 	RealIpHeader string `yaml:"real_ip_header"`
+
+	Prefork             bool   `yaml:"prefork"`
+	StrictRouting       bool   `yaml:"strict_routing"`
+	CaseSensitive       bool   `yaml:"case_sensitive"`
+	BodyLimitBytes      int    `yaml:"body_limit_bytes"`
+	ReadTimeoutSeconds  int    `yaml:"read_timeout_seconds"`
+	WriteTimeoutSeconds int    `yaml:"write_timeout_seconds"`
+	IdleTimeoutSeconds  int    `yaml:"idle_timeout_seconds"`
+	GetIpFromHeader     string `yaml:"get_ip_from_header"`
+	EnableKeepAlive     bool   `yaml:"enable_keep_alive"`
 }
 
 type AntiBotConfig struct {

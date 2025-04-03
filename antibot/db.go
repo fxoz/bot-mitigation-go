@@ -1,108 +1,83 @@
 package antibot
 
 import (
-	"fmt"
 	"log"
-	"os"
+	"sync"
 	"time"
 	"waffe/utils"
-
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
-	"gorm.io/gorm/logger"
 )
 
-type CheckedClient struct {
-	IP           string `gorm:"primaryKey"`
-	PassedAtUnix *int64
-	IsVerified   bool
+type ClientRecord struct {
+	IP         string
+	VerifiedAt *time.Time
+	IsVerified bool
 }
 
-func getClient(db *gorm.DB, clientIP string) (*CheckedClient, error) {
-	var client CheckedClient
-	err := db.Where("ip = ?", clientIP).First(&client).Error
-	return &client, err
-}
+var (
+	clientCache = make(map[string]*ClientRecord)
+	cacheMutex  sync.RWMutex
+	cfg         = utils.LoadConfig("config.yml")
+)
 
-var cfg = utils.LoadConfig("config.yml")
+func RequiresReVerification(clientIP string) bool {
+	cacheMutex.RLock()
+	record, exists := clientCache[clientIP]
+	cacheMutex.RUnlock()
 
-func NeedsVerification(db *gorm.DB, clientIP string) bool {
-	client, err := getClient(db, clientIP)
-	if err != nil {
+	if !exists || record.VerifiedAt == nil {
 		return true
 	}
 
-	if client.PassedAtUnix == nil {
+	if time.Since(*record.VerifiedAt) > time.Duration(cfg.AntiBot.VerificationValidForSeconds)*time.Second {
 		return true
 	}
 
-	verifiedAt := time.Unix(*client.PassedAtUnix, 0)
-	return time.Since(verifiedAt).Seconds() > float64(cfg.AntiBot.VerificationValidForSeconds)
+	return false
 }
 
-func IsClientVerified(db *gorm.DB, clientIP string) bool {
-	client, err := getClient(db, clientIP)
-	if err != nil || !client.IsVerified || client.PassedAtUnix == nil {
+func IsClientCurrentlyVerified(clientIP string) bool {
+	cacheMutex.RLock()
+	record, exists := clientCache[clientIP]
+	cacheMutex.RUnlock()
+
+	if !exists || !record.IsVerified || record.VerifiedAt == nil {
 		return false
 	}
 
-	verifiedAt := time.Unix(*client.PassedAtUnix, 0)
-	return time.Since(verifiedAt).Seconds() <= float64(cfg.AntiBot.VerificationValidForSeconds)
+	if time.Since(*record.VerifiedAt) > time.Duration(cfg.AntiBot.VerificationValidForSeconds)*time.Second {
+		return false
+	}
+
+	return true
 }
 
-func AddClient(db *gorm.DB, clientIP string) {
-	if _, err := getClient(db, clientIP); err == nil {
+func RegisterClient(clientIP string) {
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
+
+	if _, exists := clientCache[clientIP]; exists {
 		return
 	}
 
-	client := CheckedClient{IP: clientIP, IsVerified: false}
-	if err := db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "ip"}},
-		DoNothing: true,
-	}).Create(&client).Error; err != nil {
-		log.Fatalf("failed to add client %s: %v", clientIP, err)
+	clientCache[clientIP] = &ClientRecord{
+		IP:         clientIP,
+		IsVerified: false,
 	}
-	log.Printf("added client with IP %s", clientIP)
+	log.Printf("Registered new client with IP %s", clientIP)
 }
 
-func SetClientVerified(db *gorm.DB, clientIP string) {
-	client, err := getClient(db, clientIP)
-	if err != nil {
-		log.Fatalf("failed to find client %s: %v", clientIP, err)
-	}
-	now := time.Now().Unix()
-	client.IsVerified = true
-	client.PassedAtUnix = &now
+func MarkClientVerified(clientIP string) {
+	now := time.Now()
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
 
-	if err := db.Save(client).Error; err != nil {
-		log.Fatalf("failed to verify client %s: %v", clientIP, err)
-	}
-	log.Printf("verified client with IP %s", clientIP)
-}
-
-func InitDB() *gorm.DB {
-	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags),
-		logger.Config{SlowThreshold: time.Second, LogLevel: logger.Silent, Colorful: false},
-	)
-
-	const folder = "db"
-	if _, err := os.Stat(folder); os.IsNotExist(err) {
-		if err := os.Mkdir(folder, 0755); err != nil {
-			fmt.Println("Error creating folder:", err)
-		} else {
-			fmt.Println("Folder created successfully.")
-		}
+	record, exists := clientCache[clientIP]
+	if !exists {
+		record = &ClientRecord{IP: clientIP}
+		clientCache[clientIP] = record
 	}
 
-	db, err := gorm.Open(sqlite.Open("db/antibot-verification.db"), &gorm.Config{Logger: newLogger})
-	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
-	}
-
-	if err := db.AutoMigrate(&CheckedClient{}); err != nil {
-		log.Fatalf("failed to migrate database: %v", err)
-	}
-	return db
+	record.IsVerified = true
+	record.VerifiedAt = &now
+	log.Printf("Verified client with IP %s", clientIP)
 }

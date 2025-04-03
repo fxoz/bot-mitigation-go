@@ -4,7 +4,6 @@ import (
 	"waffe/utils"
 
 	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
 )
 
 type Checks struct {
@@ -22,7 +21,7 @@ type ChecksResponse struct {
 	Verified bool `json:"verified"`
 }
 
-func JudgeClient(db *gorm.DB) fiber.Handler {
+func JudgeClient() fiber.Handler {
 	cfg := utils.LoadConfig("config.yml")
 	return func(c *fiber.Ctx) error {
 		if c.Method() != fiber.MethodPost {
@@ -60,12 +59,12 @@ func JudgeClient(db *gorm.DB) fiber.Handler {
 			score += 700
 		}
 
-		AddClient(db, c.IP())
+		RegisterClient(c.IP())
 		if score >= cfg.AntiBot.Threshold {
 			return c.Status(fiber.StatusOK).JSON(ChecksResponse{Verified: false})
 		}
 
-		SetClientVerified(db, c.IP())
+		MarkClientVerified(c.IP())
 		return c.Status(fiber.StatusOK).JSON(ChecksResponse{Verified: true})
 	}
 }

@@ -4,12 +4,27 @@ transfer:
   timeout_idle_seconds: 60
 
 server:
+  # use_profiler: true
+  use_profiler: false
   proxy: localhost:9977
   # proxy: 0.0.0.0:9977
 
   # The server that receives the requests from the proxy server
   origin: http://localhost:9812
   real_ip_header: X-Real-IP
+
+  # Prefork: Utilizes mutliple CPU cores. Note that this might even be slower than the default! Depends on the hardware, testing is required.
+  prefork: false
+  strict_routing: false
+  case_sensitive: true
+  body_limit_bytes: 1000000 # 1MB
+  get_ip_from_header: ''
+  enable_keep_alive: true
+
+  read_timeout_seconds: 60
+  write_timeout_seconds: 60
+  idle_timeout_seconds: 60
+
 
 antibot:
   # Anti-Bot is a set of JavaScript checks that is used to verify the authenticity of the client.
