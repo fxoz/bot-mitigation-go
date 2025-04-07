@@ -30,8 +30,11 @@ Requirements:
 
 A basic testing environment can be launched like so:
 
+- `pip install -r testing/requirements.txt`
 - `py testing/_server.py`
 - `go run .`
+
+To make sure that automated browsers like _Playwright Stealth_ are recognized as such, try `py testing/pw_stealth.py`
 
 ### High Performance Build
 
