@@ -42,6 +42,8 @@ func IsCaptchaCorrect(clientIP string, x int, y int) bool {
 		return true
 	}
 
+	log.Printf("Captcha verification failed for IP %s, coordinates: (%d, %d)", clientIP, x, y)
+	log.Printf("Correct region: (%d, %d) to (%d, %d)", record.CorrectRegion.Min.X, record.CorrectRegion.Min.Y, record.CorrectRegion.Max.X, record.CorrectRegion.Max.Y)
 	return false
 }
 
@@ -66,7 +68,8 @@ func RegisterCaptcha(clientIP string, correctRegion image.Rectangle) {
 	defer cacheMutex.Unlock()
 
 	if _, exists := captchaTasksCache[clientIP]; exists {
-		return
+		captchaTasksCache[clientIP].CorrectRegion = correctRegion
+
 	}
 
 	captchaTasksCache[clientIP] = &CaptchaTask{

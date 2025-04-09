@@ -8,20 +8,27 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/disintegration/imaging"
 )
 
-var folderPath = "captcha/dataset"
-var ScaledWidth = 300
-var ScaledHeight = 150
+var (
+	folderPath   = "captcha/dataset"
+	ScaledWidth  = 300
+	ScaledHeight = 150
 
-var fileTypes = []string{
-	"*.jpg",
-	"*.jpeg",
-	"*.png",
-}
+	fileTypes = []string{
+		"*.jpg",
+		"*.jpeg",
+		"*.png",
+	}
+
+	// Cache file list and ensure it is only loaded once.
+	fileList     []string
+	fileListOnce sync.Once
+)
 
 type CaptchaImage struct {
 	DataUri       string
@@ -32,30 +39,32 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func getRandomInputFile() string {
+func getFileList() {
 	files, err := os.ReadDir(folderPath)
 	if err != nil {
 		log.Fatalf("Error reading directory: %v", err)
 	}
 
-	var validFiles []string
 	for _, file := range files {
 		if file.IsDir() {
 			continue
 		}
 		for _, fileType := range fileTypes {
 			if matched, _ := filepath.Match(fileType, file.Name()); matched {
-				validFiles = append(validFiles, file.Name())
+				fileList = append(fileList, filepath.Join(folderPath, file.Name()))
 				break
 			}
 		}
 	}
 
-	if len(validFiles) == 0 {
+	if len(fileList) == 0 {
 		log.Fatal("No valid files found in directory.")
 	}
+}
 
-	return filepath.Join(folderPath, validFiles[rand.Intn(len(validFiles))])
+func getRandomInputFile() string {
+	fileListOnce.Do(getFileList)
+	return fileList[rand.Intn(len(fileList))]
 }
 
 func GenerateImageCaptcha() CaptchaImage {
@@ -71,26 +80,25 @@ func GenerateImageCaptcha() CaptchaImage {
 	imgHeight := bounds.Dy()
 
 	if imgWidth < ScaledWidth || imgHeight < ScaledHeight {
-		log.Fatalf("Image is too small for a 240x480 crop.")
+		log.Fatalf("Image is too small for a %dx%d crop", ScaledWidth, ScaledHeight)
 	}
 
 	baseX := rand.Intn(imgWidth - ScaledWidth + 1)
 	baseY := rand.Intn(imgHeight - ScaledHeight + 1)
 	workingImg := imaging.Crop(src, image.Rect(baseX, baseY, baseX+ScaledWidth, baseY+ScaledHeight))
-	wWidth, wHeight := ScaledWidth, ScaledHeight
 
 	boxWidth := rand.Intn(21) + 20
 	boxHeight := rand.Intn(21) + 20
 
-	if boxWidth > wWidth {
-		boxWidth = wWidth
+	if boxWidth > ScaledWidth {
+		boxWidth = ScaledWidth
 	}
-	if boxHeight > wHeight {
-		boxHeight = wHeight
+	if boxHeight > ScaledHeight {
+		boxHeight = ScaledHeight
 	}
 
-	maxX := wWidth - boxWidth
-	maxY := wHeight - boxHeight
+	maxX := ScaledWidth - boxWidth
+	maxY := ScaledHeight - boxHeight
 	posX := rand.Intn(maxX + 1)
 	posY := rand.Intn(maxY + 1)
 
@@ -104,8 +112,7 @@ func GenerateImageCaptcha() CaptchaImage {
 	result := imaging.Paste(workingImg, adjusted, image.Pt(posX, posY))
 
 	var buf bytes.Buffer
-	err = imaging.Encode(&buf, result, imaging.JPEG)
-	if err != nil {
+	if err = imaging.Encode(&buf, result, imaging.JPEG); err != nil {
 		log.Fatalf("Failed to encode image: %v", err)
 	}
 
