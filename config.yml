@@ -37,5 +37,8 @@ antibot:
   # Can be very low for testing, but should be rather high for production
   verification_valid_for_seconds: 10
 
+captcha:
+  verification_valid_for_seconds: 10
+
 other:
   obfuscate_javascript: true

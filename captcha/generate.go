@@ -14,6 +14,8 @@ import (
 	"github.com/disintegration/imaging"
 )
 
+var folderPath = "captcha/dataset"
+
 var fileTypes = []string{
 	"*jpg",
 	"*jpeg",
@@ -26,7 +28,7 @@ type CaptchaImage struct {
 }
 
 func getRandomInputFile() string {
-	files, err := os.ReadDir("dataset")
+	files, err := os.ReadDir(folderPath)
 	if err != nil {
 		log.Fatalf("Error reading directory: %v", err)
 	}
@@ -48,12 +50,11 @@ func getRandomInputFile() string {
 		log.Fatal("No valid files found in directory.")
 	}
 
-	return filepath.Join("dataset", validFiles[rand.Intn(len(validFiles))])
+	return filepath.Join(folderPath, validFiles[rand.Intn(len(validFiles))])
 }
 
 func GenerateImageCaptcha() CaptchaImage {
 	start := time.Now()
-	rand.Seed(time.Now().UnixNano())
 
 	inputFile := getRandomInputFile()
 
@@ -68,17 +69,14 @@ func GenerateImageCaptcha() CaptchaImage {
 	imgHeight := bounds.Dy()
 	fmt.Printf("Image dimensions: %d x %d\n", imgWidth, imgHeight)
 
-	// Ensure image is large enough to pick a region.
 	if imgWidth < 100 || imgHeight < 100 {
 		fmt.Fprintln(os.Stderr, "Image is too small for a minimum random box of 50x50 pixels.")
 		os.Exit(1)
 	}
 
-	// Choose a random region size between 50 and 100 pixels.
-	boxWidth := rand.Intn(51) + 50  // 50 to 100 pixels width
-	boxHeight := rand.Intn(51) + 50 // 50 to 100 pixels height
+	boxWidth := rand.Intn(51) + 50
+	boxHeight := rand.Intn(51) + 50
 
-	// Calculate a random top-left position for the region.
 	maxX := imgWidth - boxWidth
 	maxY := imgHeight - boxHeight
 	posX := rand.Intn(maxX + 1)

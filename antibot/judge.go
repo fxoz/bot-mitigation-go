@@ -1,6 +1,7 @@
 package antibot
 
 import (
+	"fmt"
 	"waffe/utils"
 
 	"github.com/gofiber/fiber/v2"
@@ -60,6 +61,9 @@ func JudgeClient() fiber.Handler {
 		}
 
 		RegisterClient(c.IP())
+
+		fmt.Println("Score:", score)
+
 		if score >= cfg.AntiBot.Threshold {
 			return c.Status(fiber.StatusOK).JSON(ChecksResponse{Verified: false})
 		}

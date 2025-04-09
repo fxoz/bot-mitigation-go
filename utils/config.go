@@ -12,6 +12,7 @@ type Config struct {
 	Transfer TransferConfig `yaml:"transfer"`
 	Server   ServerConfig   `yaml:"server"`
 	AntiBot  AntiBotConfig  `yaml:"antibot"`
+	Captcha  CaptchaConfig  `yaml:"captcha"`
 	Other    OtherConfig    `yaml:"other"`
 }
 
@@ -42,6 +43,10 @@ type AntiBotConfig struct {
 	Enabled                     bool `yaml:"enabled"`
 	Threshold                   int  `yaml:"threshold"`
 	VerificationValidForSeconds int  `yaml:"verification_valid_for_seconds"`
+}
+
+type CaptchaConfig struct {
+	VerificationValidForSeconds int `yaml:"verification_valid_for_seconds"`
 }
 
 type OtherConfig struct {

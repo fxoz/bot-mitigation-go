@@ -19,7 +19,7 @@ var (
 	cfg         = utils.LoadConfig("config.yml")
 )
 
-func RequiresReVerification(clientIP string) bool {
+func RequiresVerification(clientIP string) bool {
 	cacheMutex.RLock()
 	record, exists := clientCache[clientIP]
 	cacheMutex.RUnlock()
@@ -33,22 +33,6 @@ func RequiresReVerification(clientIP string) bool {
 	}
 
 	return false
-}
-
-func IsClientCurrentlyVerified(clientIP string) bool {
-	cacheMutex.RLock()
-	record, exists := clientCache[clientIP]
-	cacheMutex.RUnlock()
-
-	if !exists || !record.IsVerified || record.VerifiedAt == nil {
-		return false
-	}
-
-	if time.Since(*record.VerifiedAt) > time.Duration(cfg.AntiBot.VerificationValidForSeconds)*time.Second {
-		return false
-	}
-
-	return true
 }
 
 func RegisterClient(clientIP string) {

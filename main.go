@@ -18,24 +18,19 @@ import (
 var cfg = utils.LoadConfig("config.yml")
 
 func onRequestHandler(c *fiber.Ctx) error {
+	if strings.HasPrefix(c.Path(), "/.__core_") {
+		return c.Next()
+	}
 	if strings.HasPrefix(c.Path(), "/debug/pprof") && cfg.Server.UseProfiler {
 		return c.Next()
 	}
 
-	if c.Path() == "/.__core_/captcha" || c.Path() == "/.__core_/api/judge" {
-		return c.Next()
-	}
-
 	ip := c.IP()
-	if antibot.RequiresReVerification(ip) {
+	if antibot.RequiresVerification(ip) {
 		if !utils.IsHTMLRequest(c) {
 			return c.Status(fiber.StatusForbidden).SendString("Access denied")
 		}
 		return utils.RenderPage("bot_protection", c)
-	}
-
-	if !antibot.IsClientCurrentlyVerified(ip) {
-		return c.Status(fiber.StatusForbidden).SendString("Checks failed")
 	}
 
 	if err := utils.RequestOrigin(c); err != nil {
@@ -56,10 +51,31 @@ func generateCaptchaHandler(c *fiber.Ctx) error {
 	}
 
 	response := map[string]string{
-		"dataUri":       captchaImage.DataUri,
-		"correctRegion": "",
+		"image": captchaImage.DataUri,
 	}
+
+	captcha.RegisterCaptcha(c.IP(), captchaImage.CorrectRegion)
 	return c.JSON(response)
+}
+
+func verifyCaptchaHandler(c *fiber.Ctx) error {
+	clientIP := c.IP()
+	if !captcha.RequiresVerification(clientIP) {
+		return c.Status(fiber.StatusForbidden).SendString("Captcha verification not required")
+	}
+
+	var request struct {
+		X int `json:"x"`
+		Y int `json:"y"`
+	}
+	if err := c.BodyParser(&request); err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid JSON format")
+	}
+
+	if captcha.IsCaptchaCorrect(clientIP, request.X, request.Y) {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": true})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": false})
 }
 
 func main() {
@@ -91,7 +107,8 @@ func main() {
 
 	app.Use(logger.New())
 	app.Post("/.__core_/api/judge", antibot.JudgeClient())
-	app.Post("/.__core_/api/captcha/generate", generateCaptchaHandler)
+	app.Post("/.__core_/api/captcha/verify", verifyCaptchaHandler)
+	app.Get("/.__core_/api/captcha/generate", generateCaptchaHandler)
 	app.Get("/.__core_/captcha", captchaHandler)
 	app.All("/*", onRequestHandler)
 
