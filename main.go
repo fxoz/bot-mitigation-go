@@ -20,7 +20,7 @@ func onRequestHandler(c *fiber.Ctx) error {
 		return c.Next()
 	}
 
-	if c.Path() == "/.__captcha" || c.Path() == "/.__/api/__judge" {
+	if c.Path() == "/.__core_/captcha" || c.Path() == "/.__core_/api/__judge" {
 		return c.Next()
 	}
 
@@ -75,8 +75,8 @@ func main() {
 	})
 
 	// app.Use(logger.New())
-	app.Post("/.__/api/__judge", antibot.JudgeClient())
-	app.Get("/.__captcha", captchaHandler)
+	app.Post("/.__core_/api/__judge", antibot.JudgeClient())
+	app.Get("/.__core_/captcha", captchaHandler)
 	app.All("/*", onRequestHandler)
 
 	if cfg.Server.UseProfiler {

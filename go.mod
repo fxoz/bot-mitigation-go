@@ -1,7 +1,8 @@
 module waffe
 
-go 1.22.3
-toolchain go1.24.1
+go 1.23.0
+
+toolchain go1.24.2
 
 require (
 	github.com/bytedance/sonic v1.13.2
@@ -14,7 +15,9 @@ require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
+	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/h2non/bimg v1.1.9 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -26,5 +29,6 @@ require (
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
+	golang.org/x/image v0.26.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 )
