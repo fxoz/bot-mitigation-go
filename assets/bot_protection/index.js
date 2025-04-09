@@ -32,7 +32,7 @@ function main() {
     reportedUserAgent: reportedUserAgent
     };
     
-    fetch("/.__core_/api/__judge", {
+    fetch("/.__core_/api/judge", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

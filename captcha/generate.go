@@ -1,4 +1,4 @@
-package main
+package captcha
 
 import (
 	"bytes"
@@ -21,8 +21,8 @@ var fileTypes = []string{
 }
 
 type CaptchaImage struct {
-	dataUri       string
-	correctRegion image.Rectangle
+	DataUri       string
+	CorrectRegion image.Rectangle
 }
 
 func getRandomInputFile() string {
@@ -39,7 +39,7 @@ func getRandomInputFile() string {
 		for _, fileType := range fileTypes {
 			if matched, _ := filepath.Match(fileType, file.Name()); matched {
 				validFiles = append(validFiles, file.Name())
-				break // avoid duplicate entries for multiple matches
+				break
 			}
 		}
 	}
@@ -142,8 +142,8 @@ func GenerateImageCaptcha() CaptchaImage {
 	fmt.Printf("\nTime taken: %v\n", time.Since(start))
 
 	return CaptchaImage{
-		dataUri:       dataURI,
-		correctRegion: image.Rect(blurX1, blurY1, blurX2, blurY2),
+		DataUri:       dataURI,
+		CorrectRegion: image.Rect(blurX1, blurY1, blurX2, blurY2),
 	}
 
 }

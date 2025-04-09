@@ -5,11 +5,13 @@ import (
 	"strings"
 	"time"
 	"waffe/antibot"
+	"waffe/captcha"
 	"waffe/utils"
 
 	"github.com/bytedance/sonic"
 	"github.com/fatih/color"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/pprof"
 )
 
@@ -20,7 +22,7 @@ func onRequestHandler(c *fiber.Ctx) error {
 		return c.Next()
 	}
 
-	if c.Path() == "/.__core_/captcha" || c.Path() == "/.__core_/api/__judge" {
+	if c.Path() == "/.__core_/captcha" || c.Path() == "/.__core_/api/judge" {
 		return c.Next()
 	}
 
@@ -45,6 +47,19 @@ func onRequestHandler(c *fiber.Ctx) error {
 
 func captchaHandler(c *fiber.Ctx) error {
 	return utils.RenderPage("captcha", c)
+}
+
+func generateCaptchaHandler(c *fiber.Ctx) error {
+	captchaImage := captcha.GenerateImageCaptcha()
+	if captchaImage.DataUri == "" {
+		return c.Status(fiber.StatusInternalServerError).SendString("Failed to generate captcha")
+	}
+
+	response := map[string]string{
+		"dataUri":       captchaImage.DataUri,
+		"correctRegion": "",
+	}
+	return c.JSON(response)
 }
 
 func main() {
@@ -74,8 +89,9 @@ func main() {
 		JSONDecoder:      sonic.Unmarshal,
 	})
 
-	// app.Use(logger.New())
-	app.Post("/.__core_/api/__judge", antibot.JudgeClient())
+	app.Use(logger.New())
+	app.Post("/.__core_/api/judge", antibot.JudgeClient())
+	app.Post("/.__core_/api/captcha/generate", generateCaptchaHandler)
 	app.Get("/.__core_/captcha", captchaHandler)
 	app.All("/*", onRequestHandler)
 
