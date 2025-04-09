@@ -5,18 +5,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        html {
+            font-family: sans-serif;
+            color: white;
+        }
 
+        body {
+            background-color: #111111;
+            min-height: 100vh;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        #captcha {
+            cursor: pointer;
+            border-radius: 10px;
+            width: fit-content;
+        }
+
+        #captchaImage {
+            width: 600px;
+        }
     </style>
     <title>Document</title>
 </head>
 
 <body>
-    <h1>
-        Captcha triggered
-    </h1>
-
+    <h2>
+        Click the rectangle that feels 'off'
+    </h2>
+    <p>
+        To continue, please click in the middle of the part that feels 'off' in the image below. This is a test to
+        ensure that you are not a robot. If you are having trouble, please refresh the page to get a new image.
+    </p>
     <div id="captcha">
-        <img id="captchaImage">
+        <img id="captchaImage" ondragstart="return false">
     </div>
 </body>
 

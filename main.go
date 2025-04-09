@@ -61,6 +61,7 @@ func generateCaptchaHandler(c *fiber.Ctx) error {
 func verifyCaptchaHandler(c *fiber.Ctx) error {
 	clientIP := c.IP()
 	if !captcha.RequiresVerification(clientIP) {
+		color.Blue("Captcha verification not required, IP %s", clientIP)
 		return c.Status(fiber.StatusForbidden).SendString("Captcha verification not required")
 	}
 
@@ -73,8 +74,10 @@ func verifyCaptchaHandler(c *fiber.Ctx) error {
 	}
 
 	if captcha.IsCaptchaCorrect(clientIP, request.X, request.Y) {
+		color.Green("Captcha solved, IP %s", clientIP)
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": true})
 	}
+	color.Red("Captcha for IP %s", clientIP)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": false})
 }
 

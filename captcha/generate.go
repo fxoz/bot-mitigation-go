@@ -3,7 +3,6 @@ package captcha
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"image"
 	"log"
 	"math/rand"
@@ -15,16 +14,22 @@ import (
 )
 
 var folderPath = "captcha/dataset"
+var scaledWidth = 300
+var scaledHeight = 150
 
 var fileTypes = []string{
-	"*jpg",
-	"*jpeg",
-	"*png",
+	"*.jpg",
+	"*.jpeg",
+	"*.png",
 }
 
 type CaptchaImage struct {
 	DataUri       string
 	CorrectRegion image.Rectangle
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
 
 func getRandomInputFile() string {
@@ -54,49 +59,52 @@ func getRandomInputFile() string {
 }
 
 func GenerateImageCaptcha() CaptchaImage {
-	start := time.Now()
-
 	inputFile := getRandomInputFile()
 
+	// Open the original image.
 	src, err := imaging.Open(inputFile)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to open image: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Failed to open image: %v", err)
 	}
 
 	bounds := src.Bounds()
 	imgWidth := bounds.Dx()
 	imgHeight := bounds.Dy()
-	fmt.Printf("Image dimensions: %d x %d\n", imgWidth, imgHeight)
 
-	if imgWidth < 100 || imgHeight < 100 {
-		fmt.Fprintln(os.Stderr, "Image is too small for a minimum random box of 50x50 pixels.")
-		os.Exit(1)
+	if imgWidth < scaledWidth || imgHeight < scaledHeight {
+		log.Fatalf("Image is too small for a 240x480 crop.")
 	}
 
-	boxWidth := rand.Intn(51) + 50
-	boxHeight := rand.Intn(51) + 50
+	baseX := rand.Intn(imgWidth - scaledWidth + 1)
+	baseY := rand.Intn(imgHeight - scaledHeight + 1)
+	workingImg := imaging.Crop(src, image.Rect(baseX, baseY, baseX+scaledWidth, baseY+scaledHeight))
+	wWidth, wHeight := scaledWidth, scaledHeight
 
-	maxX := imgWidth - boxWidth
-	maxY := imgHeight - boxHeight
+	boxWidth := rand.Intn(21) + 20
+	boxHeight := rand.Intn(21) + 20
+
+	if boxWidth > wWidth {
+		boxWidth = wWidth
+	}
+	if boxHeight > wHeight {
+		boxHeight = wHeight
+	}
+
+	maxX := wWidth - boxWidth
+	maxY := wHeight - boxHeight
 	posX := rand.Intn(maxX + 1)
 	posY := rand.Intn(maxY + 1)
-	fmt.Printf("Random region: top-left (%d, %d) with size %dx%d\n", posX, posY, boxWidth, boxHeight)
 
 	regionRect := image.Rect(posX, posY, posX+boxWidth, posY+boxHeight)
-	region := imaging.Crop(src, regionRect)
+	region := imaging.Crop(workingImg, regionRect)
 
 	inverted := imaging.Invert(region)
+	adjusted := imaging.AdjustContrast(inverted, 45.0)
+	adjusted = imaging.AdjustSaturation(adjusted, 50)
 
-	brightnessChange := rand.Intn(20) + 30
-	if rand.Intn(2) == 0 {
-		brightnessChange = -brightnessChange
-	}
-	adjusted := imaging.AdjustBrightness(inverted, float64(brightnessChange))
+	result := imaging.Paste(workingImg, adjusted, image.Pt(posX, posY))
 
-	result := imaging.Paste(src, adjusted, image.Pt(posX, posY))
-
-	margin := 10
+	margin := 5
 	blurX1 := posX - margin
 	blurY1 := posY - margin
 	blurX2 := posX + boxWidth + margin
@@ -108,40 +116,28 @@ func GenerateImageCaptcha() CaptchaImage {
 	if blurY1 < 0 {
 		blurY1 = 0
 	}
-	if blurX2 > imgWidth {
-		blurX2 = imgWidth
+	if blurX2 > wWidth {
+		blurX2 = wWidth
 	}
-	if blurY2 > imgHeight {
-		blurY2 = imgHeight
+	if blurY2 > wHeight {
+		blurY2 = wHeight
 	}
 	blurRect := image.Rect(blurX1, blurY1, blurX2, blurY2)
 
 	blurRegion := imaging.Crop(result, blurRect)
-	blurred := imaging.Blur(blurRegion, 5.0)
+	blurred := imaging.Blur(blurRegion, 2.0)
 	result = imaging.Paste(result, blurred, image.Pt(blurX1, blurY1))
-
-	// err = imaging.Save(result, outputFile)
-	// if err != nil {
-	// 	fmt.Fprintf(os.Stderr, "Failed to save image: %v\n", err)
-	// 	os.Exit(1)
-	// }
-
-	// fmt.Println("Processed image saved as:", outputFile)
 
 	var buf bytes.Buffer
 	err = imaging.Encode(&buf, result, imaging.JPEG)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Failed to encode image: %v\n", err)
-		os.Exit(1)
+		log.Fatalf("Failed to encode image: %v", err)
 	}
 
 	dataURI := "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(buf.Bytes())
 
-	fmt.Printf("\nTime taken: %v\n", time.Since(start))
-
 	return CaptchaImage{
 		DataUri:       dataURI,
-		CorrectRegion: image.Rect(blurX1, blurY1, blurX2, blurY2),
+		CorrectRegion: image.Rect(posX, posY, posX+boxWidth, posY+boxHeight),
 	}
-
 }

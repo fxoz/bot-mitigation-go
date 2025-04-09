@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 	"waffe/utils"
+
+	"github.com/fatih/color"
 )
 
 type CaptchaTask struct {
@@ -27,6 +29,7 @@ func IsCaptchaCorrect(clientIP string, x int, y int) bool {
 
 	record, exists := captchaTasksCache[clientIP]
 	if !exists {
+		color.Yellow("Captcha verification failed: No record found for IP %s", clientIP)
 		return false
 	}
 
@@ -35,11 +38,9 @@ func IsCaptchaCorrect(clientIP string, x int, y int) bool {
 		record.IsVerified = true
 		now := time.Now()
 		record.VerifiedAt = &now
-		log.Printf("Captcha solved, IP %s", clientIP)
 		return true
 	}
 
-	log.Printf("Captcha incorrect, IP %s", clientIP)
 	return false
 }
 
