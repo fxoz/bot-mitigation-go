@@ -14,8 +14,8 @@ import (
 )
 
 var folderPath = "captcha/dataset"
-var scaledWidth = 300
-var scaledHeight = 150
+var ScaledWidth = 300
+var ScaledHeight = 150
 
 var fileTypes = []string{
 	"*.jpg",
@@ -61,7 +61,6 @@ func getRandomInputFile() string {
 func GenerateImageCaptcha() CaptchaImage {
 	inputFile := getRandomInputFile()
 
-	// Open the original image.
 	src, err := imaging.Open(inputFile)
 	if err != nil {
 		log.Fatalf("Failed to open image: %v", err)
@@ -71,14 +70,14 @@ func GenerateImageCaptcha() CaptchaImage {
 	imgWidth := bounds.Dx()
 	imgHeight := bounds.Dy()
 
-	if imgWidth < scaledWidth || imgHeight < scaledHeight {
+	if imgWidth < ScaledWidth || imgHeight < ScaledHeight {
 		log.Fatalf("Image is too small for a 240x480 crop.")
 	}
 
-	baseX := rand.Intn(imgWidth - scaledWidth + 1)
-	baseY := rand.Intn(imgHeight - scaledHeight + 1)
-	workingImg := imaging.Crop(src, image.Rect(baseX, baseY, baseX+scaledWidth, baseY+scaledHeight))
-	wWidth, wHeight := scaledWidth, scaledHeight
+	baseX := rand.Intn(imgWidth - ScaledWidth + 1)
+	baseY := rand.Intn(imgHeight - ScaledHeight + 1)
+	workingImg := imaging.Crop(src, image.Rect(baseX, baseY, baseX+ScaledWidth, baseY+ScaledHeight))
+	wWidth, wHeight := ScaledWidth, ScaledHeight
 
 	boxWidth := rand.Intn(21) + 20
 	boxHeight := rand.Intn(21) + 20
@@ -103,30 +102,6 @@ func GenerateImageCaptcha() CaptchaImage {
 	adjusted = imaging.AdjustSaturation(adjusted, 50)
 
 	result := imaging.Paste(workingImg, adjusted, image.Pt(posX, posY))
-
-	margin := 5
-	blurX1 := posX - margin
-	blurY1 := posY - margin
-	blurX2 := posX + boxWidth + margin
-	blurY2 := posY + boxHeight + margin
-
-	if blurX1 < 0 {
-		blurX1 = 0
-	}
-	if blurY1 < 0 {
-		blurY1 = 0
-	}
-	if blurX2 > wWidth {
-		blurX2 = wWidth
-	}
-	if blurY2 > wHeight {
-		blurY2 = wHeight
-	}
-	blurRect := image.Rect(blurX1, blurY1, blurX2, blurY2)
-
-	blurRegion := imaging.Crop(result, blurRect)
-	blurred := imaging.Blur(blurRegion, 2.0)
-	result = imaging.Paste(result, blurred, image.Pt(blurX1, blurY1))
 
 	var buf bytes.Buffer
 	err = imaging.Encode(&buf, result, imaging.JPEG)

@@ -66,18 +66,19 @@ func verifyCaptchaHandler(c *fiber.Ctx) error {
 	}
 
 	var request struct {
-		X int `json:"x"`
-		Y int `json:"y"`
+		X float32 `json:"x"`
+		Y float32 `json:"y"`
 	}
 	if err := c.BodyParser(&request); err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid JSON format")
 	}
 
-	if captcha.IsCaptchaCorrect(clientIP, request.X, request.Y) {
-		color.Green("Captcha solved, IP %s", clientIP)
+	clickedX := int(request.X * float32(captcha.ScaledWidth))
+	clickedY := int(request.Y * float32(captcha.ScaledHeight))
+
+	if captcha.IsCaptchaCorrect(clientIP, clickedX, clickedY) {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": true})
 	}
-	color.Red("Captcha for IP %s", clientIP)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": false})
 }
 

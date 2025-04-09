@@ -38,6 +38,7 @@ func IsCaptchaCorrect(clientIP string, x int, y int) bool {
 		record.IsVerified = true
 		now := time.Now()
 		record.VerifiedAt = &now
+		log.Printf("Captcha solved for IP %s, coordinates: (%d, %d)", clientIP, x, y)
 		return true
 	}
 

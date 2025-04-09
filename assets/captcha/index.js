@@ -16,8 +16,9 @@ function main() {
         });
 
     captchaImage.addEventListener("click", (e) => {
-        const x = e.offsetX | 0;
-        const y = e.offsetY | 0;
+        const x = e.offsetX / captchaImage.width
+        const y = e.offsetY / captchaImage.height
+        console.log(`Captcha clicked at coordinates: (${x}, ${y})`);
 
         fetch("/.__core_/api/captcha/verify", {
             method: "POST",
@@ -36,12 +37,16 @@ function main() {
                 return res.json();
             })
             .then(data => {
-                if (!data.verified) {
-                    window.location.reload();
-                } else {
+                if (data.verified) {
+                    alert("Verified!");
                     window.location.href = "/";
+                } else {
+                    alert("Failed.");
+                    window.location.reload();
                 }
-            })
+            }).catch(error => {
+                alert(`Error verifying captcha: ${error}`);
+            });
     });
 }
 

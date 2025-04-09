@@ -2,8 +2,8 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
         html {
             font-family: sans-serif;
@@ -11,8 +11,20 @@
         }
 
         body {
-            background-color: #111111;
-            min-height: 100vh;
+            background-color: #1e1e2e;
+            min-height: 100dvh;
+            margin: 0;
+            padding: 0;
+        }
+
+        main {
+            margin: 2.5rem 1rem;
+            border-radius: 10px;
+            padding: 1.5rem 2rem;
+            background-color: #313244;
+            max-width: 800px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         * {
@@ -22,27 +34,57 @@
         #captcha {
             cursor: pointer;
             border-radius: 10px;
-            width: fit-content;
+            overflow: hidden;
+            width: 100%;
         }
 
         #captchaImage {
-            width: 600px;
+            border-radius: 10px;
+            width: 100%;
+            height: auto;
+            max-width: 600px;
+        }
+
+        h2 {
+            color: #f9e2af;
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        @media screen and (max-width: 786px) {
+            main {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+            }
+
+            p {
+                font-size: 0.95rem;
+            }
         }
     </style>
-    <title>Document</title>
+    <title>Captcha required</title>
 </head>
 
 <body>
-    <h2>
-        Click the rectangle that feels 'off'
-    </h2>
-    <p>
-        To continue, please click in the middle of the part that feels 'off' in the image below. This is a test to
-        ensure that you are not a robot. If you are having trouble, please refresh the page to get a new image.
-    </p>
-    <div id="captcha">
-        <img id="captchaImage" ondragstart="return false">
-    </div>
+    <main>
+        <h2>Click the rectangle that feels 'off'</h2>
+        <p>
+            To continue, please click in the middle of the part that feels 'off' in the image below. This is a test to
+            ensure that you are not a robot. If you are having trouble, please refresh the page to get a new image.
+        </p>
+        <div id="captcha">
+            <img id="captchaImage" alt="Captcha image" ondragstart="return false" />
+        </div>
+    </main>
 </body>
 
 </html>
