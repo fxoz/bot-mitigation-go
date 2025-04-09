@@ -34,7 +34,7 @@ A basic testing environment can be launched like so:
 - `py testing/_server.py`
 - `go run .`
 
-To make sure that automated browsers like _Playwright Stealth_ are recognized as such, try `py testing/pw_stealth.py`
+To make sure that automated browsers like *Playwright Stealth* are recognized as such, try `py testing/pw_stealth.py`
 
 ### High Performance Build
 
@@ -49,6 +49,7 @@ Unless otherwise noted, all configuration options formatted `like_so` can be cha
 
 - JavaScript-based detection of automated browsers
   - Naturally, no requests are sent to the origin server until the client has been verified
+- Image CAPTCHA
 - Origin server is checked before startup
 
 ### Planned
@@ -70,8 +71,6 @@ Unless otherwise noted, all configuration options formatted `like_so` can be cha
 - Custom error pages
 - Custom filters
 - Anti-DDoS
-- Manual CAPTCHA
-  - Accessible (keyboard navigation, screen readers for visually impaired) but still robust; also low resource usage
 - SEO-friendiness (dummy pages for search engines)
 - Load balancing
 - Admin UI

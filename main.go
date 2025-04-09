@@ -77,6 +77,7 @@ func verifyCaptchaHandler(c *fiber.Ctx) error {
 	clickedY := int(request.Y * float32(captcha.ScaledHeight))
 
 	if captcha.IsCaptchaCorrect(clientIP, clickedX, clickedY) {
+		captcha.MarkCaptchaSolved(clientIP)
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": true})
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": false})
