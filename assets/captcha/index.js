@@ -1,5 +1,10 @@
 function main() {
     captchaImage = document.getElementById("captchaImage");
+    failedAttempt = document.getElementById("failedAttempt");
+
+    if (window.location.search.includes("failed=1")) {
+        failedAttempt.style.display = "block";
+    }
 
     fetch("/.__core_/api/captcha/generate")
         .then(res => {
@@ -38,11 +43,10 @@ function main() {
             })
             .then(data => {
                 if (data.verified) {
-                    alert("Verified!");
-                    window.location.href = "/";
+                    window.location.href = "/?__newly_verified=true";
                 } else {
-                    alert("Failed.");
-                    window.location.reload();
+                    const baseUrl = window.location.origin + window.location.pathname;
+                    window.location.href = `${baseUrl}?failed=1`;
                 }
             }).catch(error => {
                 alert(`Error verifying captcha: ${error}`);

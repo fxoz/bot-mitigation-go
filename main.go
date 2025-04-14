@@ -2,10 +2,10 @@ package main
 
 import (
 	"log"
-	"strings"
 	"time"
 	"waffe/antibot"
 	"waffe/captcha"
+	"waffe/core"
 	"waffe/utils"
 
 	"github.com/bytedance/sonic"
@@ -16,72 +16,6 @@ import (
 )
 
 var cfg = utils.LoadConfig("config.yml")
-
-func onRequestHandler(c *fiber.Ctx) error {
-	if strings.HasPrefix(c.Path(), "/.__core_") {
-		return c.Next()
-	}
-	if strings.HasPrefix(c.Path(), "/debug/pprof") && cfg.Server.UseProfiler {
-		return c.Next()
-	}
-
-	ip := c.IP()
-	if antibot.RequiresVerification(ip) {
-		if !utils.IsHTMLRequest(c) {
-			return c.Status(fiber.StatusForbidden).SendString("Access denied")
-		}
-		return utils.RenderPage("bot_protection", c)
-	}
-
-	if err := utils.RequestOrigin(c); err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Error processing request")
-	}
-
-	return nil
-}
-
-func captchaHandler(c *fiber.Ctx) error {
-	return utils.RenderPage("captcha", c)
-}
-
-func generateCaptchaHandler(c *fiber.Ctx) error {
-	captchaImage := captcha.GenerateImageCaptcha()
-	if captchaImage.DataUri == "" {
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to generate captcha")
-	}
-
-	response := map[string]string{
-		"image": captchaImage.DataUri,
-	}
-
-	captcha.RegisterCaptcha(c.IP(), captchaImage.CorrectRegion)
-	return c.JSON(response)
-}
-
-func verifyCaptchaHandler(c *fiber.Ctx) error {
-	clientIP := c.IP()
-	if !captcha.RequiresVerification(clientIP) {
-		color.Blue("Captcha verification not required, IP %s", clientIP)
-		return c.Status(fiber.StatusForbidden).SendString("Captcha verification not required")
-	}
-
-	var request struct {
-		X float32 `json:"x"`
-		Y float32 `json:"y"`
-	}
-	if err := c.BodyParser(&request); err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid JSON format")
-	}
-
-	clickedX := int(request.X * float32(captcha.ScaledWidth))
-	clickedY := int(request.Y * float32(captcha.ScaledHeight))
-
-	if captcha.IsCaptchaCorrect(clientIP, clickedX, clickedY) {
-		captcha.MarkCaptchaSolved(clientIP)
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": true})
-	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": false})
-}
 
 func main() {
 	if !utils.IsOriginAlive(cfg.Server.Origin) {
@@ -112,10 +46,10 @@ func main() {
 
 	app.Use(logger.New())
 	app.Post("/.__core_/api/judge", antibot.JudgeClient())
-	app.Post("/.__core_/api/captcha/verify", verifyCaptchaHandler)
-	app.Get("/.__core_/api/captcha/generate", generateCaptchaHandler)
-	app.Get("/.__core_/captcha", captchaHandler)
-	app.All("/*", onRequestHandler)
+	app.Post("/.__core_/api/captcha/verify", captcha.VerifyCaptchaRoute)
+	app.Get("/.__core_/api/captcha/generate", captcha.GenerateCaptchaRoute)
+	app.Get("/.__core_/captcha", captcha.DisplayCaptchaRoute)
+	app.All("/*", core.OnRequestHandler)
 
 	if cfg.Server.UseProfiler {
 		color.Green("Profiler enabled. Try: go tool pprof http://%s/debug/pprof/profile?seconds=10", cfg.Server.Proxy)

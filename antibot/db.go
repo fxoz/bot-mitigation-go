@@ -8,9 +8,9 @@ import (
 )
 
 type ClientRecord struct {
-	IP         string
-	VerifiedAt *time.Time
-	IsVerified bool
+	IP           string
+	VerifiedAt   *time.Time
+	IsJsVerified bool
 }
 
 var (
@@ -19,20 +19,20 @@ var (
 	cfg         = utils.LoadConfig("config.yml")
 )
 
-func RequiresVerification(clientIP string) bool {
+func IsVerified(clientIP string) bool {
 	cacheMutex.RLock()
 	record, exists := clientCache[clientIP]
 	cacheMutex.RUnlock()
 
 	if !exists || record.VerifiedAt == nil {
-		return true
+		return false
 	}
 
 	if time.Since(*record.VerifiedAt) > time.Duration(cfg.AntiBot.VerificationValidForSeconds)*time.Second {
-		return true
+		return false
 	}
 
-	return false
+	return true
 }
 
 func RegisterClient(clientIP string) {
@@ -44,8 +44,8 @@ func RegisterClient(clientIP string) {
 	}
 
 	clientCache[clientIP] = &ClientRecord{
-		IP:         clientIP,
-		IsVerified: false,
+		IP:           clientIP,
+		IsJsVerified: false,
 	}
 	log.Printf("Registered new client with IP %s", clientIP)
 }
@@ -61,7 +61,7 @@ func MarkClientVerified(clientIP string) {
 		clientCache[clientIP] = record
 	}
 
-	record.IsVerified = true
+	record.IsJsVerified = true
 	record.VerifiedAt = &now
 	log.Printf("Verified client with IP %s", clientIP)
 }

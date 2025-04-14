@@ -47,20 +47,20 @@ func IsCaptchaCorrect(clientIP string, x int, y int) bool {
 	return false
 }
 
-func RequiresVerification(clientIP string) bool {
+func IsVerified(clientIP string) bool {
 	cacheMutex.RLock()
 	record, exists := captchaTasksCache[clientIP]
 	cacheMutex.RUnlock()
 
 	if !exists || record.VerifiedAt == nil {
-		return true
+		return false
 	}
 
 	if time.Since(*record.VerifiedAt) > time.Duration(cfg.Captcha.VerificationValidForSeconds)*time.Second {
-		return true
+		return false
 	}
 
-	return false
+	return true
 }
 
 func RegisterCaptcha(clientIP string, correctRegion image.Rectangle) {
