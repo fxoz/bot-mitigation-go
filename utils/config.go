@@ -46,7 +46,9 @@ type AntiBotConfig struct {
 }
 
 type CaptchaConfig struct {
-	VerificationValidForSeconds int `yaml:"verification_valid_for_seconds"`
+	VerificationValidForSeconds      int `yaml:"verification_valid_for_seconds"`
+	MaxFailedAttempts                int `yaml:"max_failed_attempts"`
+	MaxFailedAttemptsTimespanSeconds int `yaml:"max_failed_attempts_timespan_seconds"`
 }
 
 type OtherConfig struct {

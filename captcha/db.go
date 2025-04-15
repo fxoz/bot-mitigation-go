@@ -11,10 +11,11 @@ import (
 )
 
 type CaptchaTask struct {
-	IP            string
-	VerifiedAt    *time.Time
-	IsVerified    bool
-	CorrectRegion image.Rectangle
+	IP                      string
+	VerifiedAt              *time.Time
+	IsVerified              bool
+	CorrectRegion           image.Rectangle
+	FailedAttemptTimestamps []time.Time
 }
 
 var (
@@ -44,7 +45,32 @@ func IsCaptchaCorrect(clientIP string, x int, y int) bool {
 
 	log.Printf("Captcha verification failed for IP %s, coordinates: (%d, %d)", clientIP, x, y)
 	log.Printf("Correct region: (%d, %d) to (%d, %d)", record.CorrectRegion.Min.X, record.CorrectRegion.Min.Y, record.CorrectRegion.Max.X, record.CorrectRegion.Max.Y)
+
+	record.FailedAttemptTimestamps = append(record.FailedAttemptTimestamps, time.Now())
 	return false
+}
+
+func ExceededMaxFailedAttempts(clientIP string) bool {
+	maxAttempts := cfg.Captcha.MaxFailedAttempts
+	windowDuration := time.Duration(cfg.Captcha.MaxFailedAttemptsTimespanSeconds) * time.Second
+	threshold := time.Now().Add(-windowDuration)
+
+	cacheMutex.RLock()
+	defer cacheMutex.RUnlock()
+
+	record, exists := captchaTasksCache[clientIP]
+	if !exists {
+		return false
+	}
+
+	count := 0
+	for _, ts := range record.FailedAttemptTimestamps {
+		if ts.After(threshold) {
+			count++
+		}
+	}
+
+	return count >= maxAttempts
 }
 
 func IsVerified(clientIP string) bool {
@@ -53,6 +79,11 @@ func IsVerified(clientIP string) bool {
 	cacheMutex.RUnlock()
 
 	if !exists || record.VerifiedAt == nil {
+		return false
+	}
+
+	if ExceededMaxFailedAttempts(clientIP) {
+		log.Printf("Captcha verification failed for IP %s: exceeded max failed attempts", clientIP)
 		return false
 	}
 
