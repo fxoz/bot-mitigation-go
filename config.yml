@@ -40,7 +40,7 @@ antibot:
 captcha:
   verification_valid_for_seconds: 10
   max_failed_attempts: 5
-  max_failed_attempts_timespan_seconds: 10
+  max_failed_attempts_timespan_seconds: 20
 
 other:
   obfuscate_javascript: true

@@ -1,3 +1,14 @@
+function onVerdict(data) {
+    if (data.verified) {
+        window.location.reload();
+        return
+    }
+
+    localStorage.setItem("targetUrlAfterCaptcha", window.location.href);
+    localStorage.setItem("preCaptchaTimestamp", Date.now());
+    window.location.href = "/.__core_/captcha";
+}
+
 function safeCheck(fn, fallback) {
     try {
       return fn();
@@ -38,13 +49,7 @@ function main() {
             "Content-Type": "application/json"
         },
         body: JSON.stringify(res)
-    }).then(response => response.json()).then(data => {
-        if (data.verified) {
-            window.location.reload();
-        } else {
-            window.location.href = "/.__core_/captcha";
-        }
-    }).catch(() => {
+    }).then(response => response.json()).then(data => onVerdict(data)).catch(() => {
         alert("A critical error occurred while checking your browser!");
     });
 }

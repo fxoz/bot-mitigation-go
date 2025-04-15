@@ -19,6 +19,16 @@ I rewrote the server several times to ensure excellent performance under high co
 - Tested on various browsers and platforms, see below
   - Niche browsers like *Mullvad* are tested as well, since privacy-focused browsers sometimes break websites
 
+## Implemented Features
+
+Unless otherwise noted, all configuration options formatted `like_so` can be changed in the `config.json` file.
+
+- JavaScript-based detection of automated browsers
+  - Naturally, no requests are sent to the origin server until the client has been verified
+- Image CAPTCHA
+- Origin server is checked before startup
+- Profiler for debugging
+
 ## Installation
 
 ***Not available since the project is still in development.***
@@ -42,15 +52,6 @@ To make sure that automated browsers like *Playwright Stealth* are recognized as
 go build -trimpath -ldflags="-s -w" -o _built_server.exe main.go
 ./_built_server.exe
 ```
-
-## Implemented Features
-
-Unless otherwise noted, all configuration options formatted `like_so` can be changed in the `config.json` file.
-
-- JavaScript-based detection of automated browsers
-  - Naturally, no requests are sent to the origin server until the client has been verified
-- Image CAPTCHA
-- Origin server is checked before startup
 
 ### Planned
 

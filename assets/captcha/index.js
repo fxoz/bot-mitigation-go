@@ -1,6 +1,30 @@
+function onCaptchaVerdict(data) {
+    if (data.verified) {
+        const preCaptchaTimestamp = localStorage.getItem("preCaptchaTimestamp")
+        if (preCaptchaTimestamp) {
+            if ((Date.now() - preCaptchaTimestamp ) < 60000) {
+                window.location.href = localStorage.getItem("targetUrlAfterCaptcha");
+                return
+            }
+        }
+        window.location.href = "/";
+        return
+    }
+
+    if (data.exceeded) {
+        exceededAttempts.style.display = "block";
+        document.querySelector('main').style.display = "none";
+        return;
+    }
+
+    const baseUrl = window.location.origin + window.location.pathname;
+    window.location.href = `${baseUrl}?failed=1`;
+}
+
 function main() {
     captchaImage = document.getElementById("captchaImage");
     failedAttempt = document.getElementById("failedAttempt");
+    exceededAttempts = document.getElementById("exceededAttempts");
 
     if (window.location.search.includes("failed=1")) {
         failedAttempt.style.display = "block";
@@ -41,14 +65,7 @@ function main() {
 
                 return res.json();
             })
-            .then(data => {
-                if (data.verified) {
-                    window.location.href = "/?__newly_verified=true";
-                } else {
-                    const baseUrl = window.location.origin + window.location.pathname;
-                    window.location.href = `${baseUrl}?failed=1`;
-                }
-            }).catch(error => {
+            .then(data => onCaptchaVerdict(data)).catch(error => {
                 alert(`Error verifying captcha: ${error}`);
             });
     });

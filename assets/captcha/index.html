@@ -31,6 +31,21 @@
             box-sizing: border-box;
         }
 
+        @media screen and (max-width: 786px) {
+            main {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            h2 {
+                font-size: 1.2rem;
+            }
+
+            p {
+                font-size: 0.95rem;
+            }
+        }
+
         #captcha {
             cursor: pointer;
             border-radius: 10px;
@@ -56,19 +71,22 @@
             line-height: 1.5;
         }
 
-        @media screen and (max-width: 786px) {
-            main {
-                margin: 0;
-                border-radius: 0;
-            }
 
-            h2 {
-                font-size: 1.2rem;
-            }
+        #failedAttempt {
+            display: none;
+            color: #ffb387;
+            font-size: 1.2rem;
+            background-color: #ffb38713;
+            border-radius: 10px;
+            padding: 1rem;
+            width: fit-content
+        }
 
-            p {
-                font-size: 0.95rem;
-            }
+        #exceededAttempts {
+            display: none;
+            color: #ff8787;
+            font-size: 1.2rem;
+            padding: 1rem;
         }
     </style>
     <title>Captcha required</title>
@@ -77,11 +95,8 @@
 <body>
     <main>
         <h2>Click the rectangle that feels 'off'</h2>
-        <div id="failedAttempt" style="display: none; color: #ffb387; font-size: 1.2rem;">
+        <div id="failedAttempt">
             Please try again!
-        </div>^
-        <div id="exceededAttempts" style="display: none; color: #ff8787; font-size: 1.2rem;">
-
         </div>
         <p>
             To continue, please click in the middle of the part that feels 'off' in the image below. This is a test to
@@ -91,6 +106,10 @@
             <img id="captchaImage" alt="Captcha image" ondragstart="return false" />
         </div>
     </main>
+    <div id="exceededAttempts">
+        Sorry, you have exceeded the number of attempts. Please try again later.
+        Also try a different browser.
+    </div>
 </body>
 
 </html>

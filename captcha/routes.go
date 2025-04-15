@@ -27,6 +27,12 @@ func GenerateCaptchaRoute(c *fiber.Ctx) error {
 
 func VerifyCaptchaRoute(c *fiber.Ctx) error {
 	clientIP := c.IP()
+
+	if ExceededMaxFailedAttempts(clientIP) {
+		color.Red("Captcha failed attempts exceeded, IP %s", clientIP)
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": false, "exceeded": true})
+	}
+
 	if IsVerified(clientIP) {
 		color.Blue("Captcha verification not required, IP %s", clientIP)
 		return c.Status(fiber.StatusForbidden).SendString("Captcha verification not required")
@@ -45,7 +51,7 @@ func VerifyCaptchaRoute(c *fiber.Ctx) error {
 
 	if IsCaptchaCorrect(clientIP, clickedX, clickedY) {
 		MarkCaptchaSolved(clientIP)
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": true})
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": true, "exceeded": false})
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": false})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": false, "exceeded": false})
 }

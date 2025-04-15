@@ -1,6 +1,7 @@
 package captcha
 
 import (
+	"fmt"
 	"image"
 	"log"
 	"sync"
@@ -44,7 +45,6 @@ func IsCaptchaCorrect(clientIP string, x int, y int) bool {
 	}
 
 	log.Printf("Captcha verification failed for IP %s, coordinates: (%d, %d)", clientIP, x, y)
-	log.Printf("Correct region: (%d, %d) to (%d, %d)", record.CorrectRegion.Min.X, record.CorrectRegion.Min.Y, record.CorrectRegion.Max.X, record.CorrectRegion.Max.Y)
 
 	record.FailedAttemptTimestamps = append(record.FailedAttemptTimestamps, time.Now())
 	return false
@@ -69,6 +69,8 @@ func ExceededMaxFailedAttempts(clientIP string) bool {
 			count++
 		}
 	}
+
+	fmt.Printf("Failed attempts in the last %d seconds for IP %s: %d\n", cfg.Captcha.MaxFailedAttemptsTimespanSeconds, clientIP, count)
 
 	return count >= maxAttempts
 }
@@ -98,17 +100,19 @@ func RegisterCaptcha(clientIP string, correctRegion image.Rectangle) {
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
 
-	if _, exists := captchaTasksCache[clientIP]; exists {
-		captchaTasksCache[clientIP].CorrectRegion = correctRegion
-
+	if record, exists := captchaTasksCache[clientIP]; exists {
+		record.CorrectRegion = correctRegion
+		record.IsVerified = false
+		record.VerifiedAt = nil
+		log.Printf("Updated CAPTCHA for existing client IP %s", clientIP)
+	} else {
+		captchaTasksCache[clientIP] = &CaptchaTask{
+			IP:            clientIP,
+			IsVerified:    false,
+			CorrectRegion: correctRegion,
+		}
+		log.Printf("Registered new client with IP %s", clientIP)
 	}
-
-	captchaTasksCache[clientIP] = &CaptchaTask{
-		IP:            clientIP,
-		IsVerified:    false,
-		CorrectRegion: correctRegion,
-	}
-	log.Printf("Registered new client with IP %s", clientIP)
 }
 
 func MarkCaptchaSolved(clientIP string) {

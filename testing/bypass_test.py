@@ -3,7 +3,7 @@ import requests
 
 def main():
     res = requests.post(
-        "http://localhost:9977/.__-INTERNAL-/api/__judge",
+        "http://localhost:9977/.__core_/api/judge",
         headers={
             "Accept": "*/*",
             "Accept-Language": "en-US,en;q=0.9",
