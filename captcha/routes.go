@@ -35,7 +35,7 @@ func VerifyCaptchaRoute(c *fiber.Ctx) error {
 
 	if IsVerified(clientIP) {
 		color.Blue("Captcha verification not required, IP %s", clientIP)
-		return c.Status(fiber.StatusForbidden).SendString("Captcha verification not required")
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"verified": true, "exceeded": false})
 	}
 
 	var request struct {
