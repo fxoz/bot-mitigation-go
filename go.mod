@@ -6,8 +6,9 @@ toolchain go1.24.2
 
 require (
 	github.com/bytedance/sonic v1.13.2
+	github.com/disintegration/imaging v1.6.2
 	github.com/fatih/color v1.18.0
-	github.com/gofiber/fiber/v2 v2.52.6
+	github.com/gofiber/fiber/v2 v2.52.7
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -15,9 +16,7 @@ require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
-	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/h2non/bimg v1.1.9 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
