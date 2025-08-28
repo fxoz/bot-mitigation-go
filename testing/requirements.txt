@@ -1,4 +1,4 @@
-Flask==3.1.0
+Flask==3.1.1
 playwright==1.51.0
 playwright_stealth==1.0.6
 Requests==2.32.3
