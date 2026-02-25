@@ -8,7 +8,7 @@ require (
 	github.com/bytedance/sonic v1.13.2
 	github.com/disintegration/imaging v1.6.2
 	github.com/fatih/color v1.18.0
-	github.com/gofiber/fiber/v2 v2.52.7
+	github.com/gofiber/fiber/v2 v2.52.12
 	gopkg.in/yaml.v2 v2.4.0
 )
 
